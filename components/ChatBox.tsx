@@ -1,17 +1,12 @@
 "use client";
-
-
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ChatBox({handleSubmit, input, setInput}: any) {
    
 
   return (
-    <div className="absolute bottom-[2%] w-[600px] h-[100px]">
+    <div className=" fixed md:absolute bottom-10 md:bottom-[2%] px-4 w-full md:w-[600px] h-[100px]">
       <div className="flex flex-col justify-center items-center w-full rounded-[16px] bg-[#F4F4F5]">
-        <p className="text-[#98A2B3] font-normal text-xs leading-[16px] py-2">
+        <p className="text-[#98A2B3] font-normal text-xs text-center px-4 leading-[16px] py-2">
           Sub AI may occasionally make mistakes. Please cross-check the results
           for accuracy.
         </p>
@@ -25,9 +20,9 @@ function ChatBox({handleSubmit, input, setInput}: any) {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Enter missing ingredient ... "
             className="resize-none placeholder:text-[#98A2B3] blink text-base font-medium h-[68px]
-            text-[#475367] focus:outline-none focus:outline py-5 w-[540px] border-none focus:border-none"
+            text-[#475367] focus:outline-none focus:outline pl-4 pr-2 py-5 w-full md:w-[540px] border-none focus:border-none"
           />
-          <button type="submit">
+          <button type="submit" className="py-5 pr-4">
             <svg
               width="28"
               height="28"

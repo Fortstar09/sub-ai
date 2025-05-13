@@ -1,17 +1,11 @@
 import { ArrowUpRight, Clock } from 'lucide-react'
 import React from 'react'
 
-const pastData = [
-  'carrot',
-    'Cheese',
-    'egg',
-    'onions','butter',"bell pepper", 'almond',  
 
-]
 
-const PastPrompts = () => {
+const PastPrompts = ({pastData}: {pastData: string[]}) => {
   return (
-    <div className='flex flex-col gap-5 items-center justify-center'>
+    <div className='flex flex-col gap-2 md:gap-5 items-center justify-center'>
       <p className='font-normal text-base text-[#98A2B3]'>Some past prompts:</p>
       <div className='flex gap-2 flex-wrap items-center justify-center max-w-[422px]'>
         {

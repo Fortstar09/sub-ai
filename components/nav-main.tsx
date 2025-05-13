@@ -27,7 +27,7 @@ export function NavMain({
     <SidebarGroup className="px-[14px] py-5 group-data-[collapsible=icon]:p-2">
       <SidebarMenu className="flex flex-col gap-2">
         {items.map((item) => (
-          <SidebarMenuItem key={item.title} className={` rounded-[8px] ${item.isActive ? "bg-brand" : "bg-[#EDEEF0]"} hover:bg-gray-600`}>
+          <SidebarMenuItem key={item.title} className=''>
             <SidebarMenuButton
               tooltip={item.title}
               asChild={!!item.url}

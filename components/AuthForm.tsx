@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -13,29 +13,65 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import Link from "next/link";
-
-const formSchema = z.object({
-  fullName: z.string().min(2).max(50),
-});
+import { signIn, signUp } from "@/lib/actions/user.actions";
+// import OtpModal from "./OtpModal";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const AuthForm = ({ type }: { type: string }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const formSchema = z.object({
+    fullname: type === "sign-in" ? z.string().optional() : z.string().min(2),
+    username: type === "sign-in" ? z.string().optional() : z.string().min(2),
+    email: z.string().email("Invalid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+  });
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
+      email: "",
+      password: "",
     },
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    toast("Event has been created.");
-    console.log(values);
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+
+    try {
+      if (type === "sign-up") {
+        const newUser = await signUp({
+          email: values.email,
+          password: values.password,
+          fullname: values.fullname,
+        });
+
+        if (newUser) router.push("/");
+      }
+
+      if (type === "sign-in") {
+        const response = await signIn({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (response) router.push("/");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      // setIsLoading(false);
+    }
+  };
 
   return (
     <div className=" flex flex-col gap-4 w-full max-w-sm">
@@ -50,7 +86,7 @@ const AuthForm = ({ type }: { type: string }) => {
             <>
               <FormField
                 control={form.control}
-                name="fullName"
+                name="fullname"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Fullname</FormLabel>
@@ -66,35 +102,18 @@ const AuthForm = ({ type }: { type: string }) => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
-            text-[#475367]"
-                        placeholder="Enter your full name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </>
           )}
-          
+
           <FormField
             control={form.control}
-            name="fullName"
+            name="email"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
+                    type="email"
                     className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
             text-[#475367]"
                     placeholder="Enter your full name"
@@ -107,12 +126,13 @@ const AuthForm = ({ type }: { type: string }) => {
           />
           <FormField
             control={form.control}
-            name="fullName"
+            name="password"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input
+                    type="password"
                     className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
             text-[#475367]"
                     placeholder="Enter your full name"
@@ -125,13 +145,26 @@ const AuthForm = ({ type }: { type: string }) => {
           />
           <Button
             type="submit"
-            className="h-13 w-full bg-emerald-600 hover:bg-emerald-500"
+            className="h-13 w-full flex justify-center items-center bg-emerald-600 cursor-pointer hover:bg-emerald-500"
           >
             {type === "sign-in" ? "Sign In" : "Create Account"}
+            {isLoading && (
+              <Image src="/icon/spin.svg" alt="logo" height={20} width={20} />
+            )}
           </Button>
         </form>
       </Form>
-      <div className="text-center text-base text-light ">{type === "sign-in" ? "Don't have an account? " : "Already have an account"}{" "}<Link className="text-emerald-600 hover:underline" href={type === 'sign-in'? '/sign-up' : '/sign-in'}>{type === 'sign-in'? 'Sign Up' : 'Sign In'}</Link></div>
+      <div className="text-center text-base text-light ">
+        {type === "sign-in"
+          ? "Don't have an account? "
+          : "Already have an account"}{" "}
+        <Link
+          className="text-emerald-600 hover:underline"
+          href={type === "sign-in" ? "/sign-up" : "/sign-in"}
+        >
+          {type === "sign-in" ? "Sign Up" : "Sign In"}
+        </Link>
+      </div>
     </div>
   );
 };

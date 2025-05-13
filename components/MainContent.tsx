@@ -2,8 +2,6 @@
 import { useState, useEffect, FormEvent, useRef, Fragment } from "react";
 import Intro from "./Intro";
 import PastPrompts from "./PastPrompts";
-// import ChatBox from './ChatBox'
-// import Box from './Box'
 import ChatBox from "./ChatBox";
 import UserInput from "./UserInput";
 import AIresponse from "./AIresponse";
@@ -14,11 +12,18 @@ type Message = {
   text: string;
 };
 
+const pastData = [
+  'carrot',
+    'Cheese',
+    'egg',
+    'onions','butter',"bell pepper", 'almond',  
+
+]
+
 const MainContent = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -27,6 +32,7 @@ const MainContent = () => {
 
   useEffect(() => {
     scrollToBottom();
+    console.log(messages);
   }, [messages]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -60,9 +66,7 @@ const MainContent = () => {
           sender: "bot",
           text: data.message,
         };
-        console.log("Data:", data);
-        console.log("Bot message:", botMessage);
-        console.log("Messages:", messages);
+
         setMessages((prev) => [...prev, botMessage]);
       } else {
         const errorMessage: Message = {
@@ -86,24 +90,24 @@ const MainContent = () => {
   };
 
   return (
-    <section className="main flex justify-center items-start min-h-[100vh] flex-1 rounded-xl md:min-h-min">
-      {   messages ? (
-        <div className=" gap-5 w-full pt-16 h-[520px] px-32 relative overflow-x-auto items-center justify-center">
-          {messages.map((message) => (
-            <Fragment key={message.id}>
-              { message.sender === "user" ? (
-                <UserInput key={message.id} text={message.text} />
-              ) : (
-                <AIresponse text={message.text} />
-              )}
-            </Fragment>
-          ))}
-        </div>
+    <section className="main flex justify-center items-start max-h-dvh rounded-xl md:min-h-min">
+      {!messages.length ? (
+      <div className="flex flex-col gap-5 md:gap-[40px] pt-5 md:pt-16 items-center justify-center">
+        <Intro />
+        <PastPrompts pastData={pastData} />
+      </div>
       ) : (
-        <div className="flex flex-col gap-[40px] pt-16  items-center justify-center">
-          <Intro />
-          <PastPrompts />
-        </div>
+      <div className="gap-5 w-full py-10 md:pt-16 h-[520px] px-0 md:px-16 lg:px-32 relative overflow-x-auto items-center justify-center">
+        {messages.map((message) => (
+        <Fragment key={message.id}>
+          {message.sender === "user" ? (
+          <UserInput key={message.id} text={message.text} />
+          ) : (
+          <AIresponse loading={loading} text={message.text} />
+          )}
+        </Fragment>
+        ))}
+      </div>
       )}
       <ChatBox handleSubmit={handleSubmit} input={input} setInput={setInput} />
     </section>

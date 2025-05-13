@@ -15,15 +15,10 @@ import Image from "next/image"
 
 // Menu items.
 const data = {
-  user: {
-    name: "Fortunate ogu",
-    email: "ogunyafort@gmail.com",
-    avatar: "/icon/user.svg",
-  },
   navMain: [
     {
       title: "New",
-      url: "/",
+      url: "#",
       icon: Plus,
     },
     {
@@ -49,7 +44,15 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+}
+
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
     <SidebarHeader className=" flex justify-center items-start border-b group-data-[collapsible=icon]:items-center px-[14px] py-5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-4">
@@ -62,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <NavMain items={data.navMain} />
     </SidebarContent>
     <SidebarFooter>
-      <NavUser user={data.user} />
+      <NavUser user={user} />
     </SidebarFooter>
     <SidebarRail />
   </Sidebar>

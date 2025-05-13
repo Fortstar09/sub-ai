@@ -136,6 +136,33 @@
     caret-shape: bar;
   }
 
+  .circle{
+    background-color: #EEEEEE;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    animation: Bounce .8s ease-in infinite;
+  }
+
+      .circle:nth-child(2){
+        animation-delay: .15s;
+    }
+    .circle:nth-child(3){
+        animation-delay: .25s;
+    }
+
+@keyframes Bounce{
+    0%{
+        transform: translateY(0px);
+    }
+    50%{
+        transform: translateY(-5px);
+    }
+    100%{
+        transform: translateY(0px);
+    }
+}
+
   :root {
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
