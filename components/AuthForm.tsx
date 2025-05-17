@@ -13,12 +13,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-// import { toast } from "sonner";
 import Link from "next/link";
 import { signIn, signUp } from "@/lib/actions/user.actions";
-// import OtpModal from "./OtpModal";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 
 const AuthForm = ({ type }: { type: string }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +25,6 @@ const AuthForm = ({ type }: { type: string }) => {
 
   const formSchema = z.object({
     fullname: type === "sign-in" ? z.string().optional() : z.string().min(2),
-    username: type === "sign-in" ? z.string().optional() : z.string().min(2),
     email: z.string().email("Invalid email address"),
     password: z
       .string()
@@ -38,6 +36,7 @@ const AuthForm = ({ type }: { type: string }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      fullname: "",
       email: "",
       password: "",
     },
@@ -47,15 +46,24 @@ const AuthForm = ({ type }: { type: string }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
+    console.log("values", values);
+
     try {
       if (type === "sign-up") {
-        const newUser = await signUp({
+        setIsLoading(true);
+
+        const response = await signUp({
           email: values.email,
           password: values.password,
           fullname: values.fullname,
         });
+        setIsLoading(false);
 
-        if (newUser) router.push("/");
+        toast(`${response.status}: ${response.message}`);
+
+        if (response.status === "success") {
+          router.push("/");
+        }
       }
 
       if (type === "sign-in") {
@@ -64,7 +72,13 @@ const AuthForm = ({ type }: { type: string }) => {
           password: values.password,
         });
 
-        if (response) router.push("/");
+        setIsLoading(false);
+
+        toast(`${response.status}: ${response.message}`);
+
+        if (response.status === "success") {
+          router.push("/");
+        } 
       }
     } catch (error) {
       console.log(error);

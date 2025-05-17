@@ -8,7 +8,6 @@ import { ID, Query } from "node-appwrite";
 
 //
 
-
 export const getUserInfo = async ({ userId }: getUserInfoProps) => {
   try {
     const { databases } = await createAdminClient();
@@ -16,70 +15,129 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
     const user = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.usersCollectionId,
-      [Query.equal('userId', [userId])]
-    )
+      [Query.equal("userId", [userId])]
+    );
 
     return parseStringify(user.documents[0]);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
-
+};
 
 //
 
 export const signIn = async ({ email, password }: signInProps) => {
   try {
-    const { account  } = await createAdminClient();
-    const response = await account.createEmailPasswordSession(email, password);
-    // const session = await account.createEmailPasswordSession(email, password);
+    const { account, databases } = await createAdminClient();
 
-    // (await cookies()).set("appwrite-session", session.secret, {
-    //   path: "/",
-    //   httpOnly: true,
-    //   sameSite: "strict",
-    //   secure: true,
-    // });
+    // Check if user exists
+    const existingUsers = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("email", [email])]
+    );
 
-    // const user = await getUserInfo({ userId: session.userId }) 
+    if (!existingUsers.total) {
+      const message = {
+        status: "error",
+        message: "Invalid user credentials",
+      };
 
-    return parseStringify(response);
+      return parseStringify(message);
+
+      // return { error: "Invalid user credentials" };
+    }
+
+    // Try to create session
+    let session;
+    try {
+      session = await account.createEmailPasswordSession(email, password);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      const message = {
+        status: "error",
+        message: "Invalid user credentials",
+      };
+      return parseStringify(message);
+      // return { error: "Invalid user credentials" };
+    }
+
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    const message = {
+      status: "success",
+      message: "Login Successfully",
+    };
+    return parseStringify(message);
   } catch (error) {
-    console.error('Error', error);
+    console.error("Error", error);
+
+    const message = {
+      status: "error",
+      message:
+        "An error occurred while signing in, make sure you are connected to internet",
+    };
+
+    return parseStringify(message);
   }
-}
+};
 
-//
-
-export const signUp = async ({ email, password, fullname}: SignUpParams) => {
-  
-  
-  // let newUserAccount;
-
+export const signUp = async ({ email, password, fullname }: SignUpParams) => {
   try {
+    const { databases } = await createAdminClient();
+
+    // Check if user already exists
+
+    const existingUsers = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("email", [email])]
+    );
+
+    if (existingUsers.total > 0) {
+      const message = {
+        status: "error",
+        message: "User already exists with this email",
+      };
+
+      return parseStringify(message);
+    }
+
     const { account } = await createAdminClient();
 
     const newUserAccount = await account.create(
-      ID.unique(), 
-      email, 
-      password, 
-      fullname,
-       
+      ID.unique(),
+      email,
+      password,
+      fullname
     );
 
-    // if(!newUserAccount) throw new Error('Error creating user')
+    if (!newUserAccount) {
+      const message = {
+        status: "error",
+        message: "Error in creating user, please try again",
+      };
 
-    // const newUser = await databases.createDocument(
-    //   appwriteConfig.databaseId,
-    //   appwriteConfig.usersCollectionId,
-    //   ID.unique(),
-    //   {
-    //     ...userData,
-    //     userId: newUserAccount.$id,
-    //     dwollaCustomerId,
-    //     dwollaCustomerUrl
-    //   }
-    // )
+      return parseStringify(message);
+    }
+
+    const userData = await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      ID.unique(),
+      {
+        userId: newUserAccount.$id,
+        email,
+        fullname,
+      }
+    );
+
+    if (!userData) throw new Error("Error sending user data to the database");
 
     const session = await account.createEmailPasswordSession(email, password);
 
@@ -90,12 +148,18 @@ export const signUp = async ({ email, password, fullname}: SignUpParams) => {
       secure: true,
     });
 
-    return parseStringify(newUserAccount);
-  } catch (error) {
-    console.error('Error', error);
-  }
-}
 
+    const message = {
+      status: "success",
+      message: "User created successfully",
+    };
+
+    return parseStringify(message);
+
+  } catch (error) {
+    console.error("Error", error);
+  }
+};
 
 //
 
@@ -108,10 +172,26 @@ export async function getLoggedInUser() {
 
     return parseStringify(result);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return null;
   }
 }
 
+// Create a function for logout
+export const signOut = async () => {
+  try {
+    const { account } = await createSessionClient();
+    // Redirect to sign-in page before destroying session
+    if (typeof window !== "undefined") {
+      window.location.href = "/sign-in";
+    }
 
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite-session");
 
+    return { success: true };
+  } catch (error) {
+    console.error("Error during sign out", error);
+    return { error: "Failed to sign out" };
+  }
+};

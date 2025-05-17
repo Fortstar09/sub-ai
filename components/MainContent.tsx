@@ -13,21 +13,25 @@ type Message = {
 };
 
 const pastData = [
-  'carrot',
-    'Cheese',
-    'egg',
-    'onions','butter',"bell pepper", 'almond',  
-
-]
+  "carrot",
+  "Cheese",
+  "egg",
+  "onions",
+  "butter",
+  "bell pepper",
+  "almond",
+];
 
 const MainContent = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
   };
 
   useEffect(() => {
@@ -37,6 +41,7 @@ const MainContent = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    scrollToBottom();
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -47,7 +52,7 @@ const MainContent = () => {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setLoading(true);
+    setLoading(false);
 
     try {
       const response = await fetch("/api/chat", {
@@ -83,6 +88,7 @@ const MainContent = () => {
         sender: "bot",
         text: "An Unexpected error occurred.",
       };
+
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
@@ -92,22 +98,23 @@ const MainContent = () => {
   return (
     <section className="main flex justify-center items-start max-h-dvh rounded-xl md:min-h-min">
       {!messages.length ? (
-      <div className="flex flex-col gap-5 md:gap-[40px] pt-5 md:pt-16 items-center justify-center">
-        <Intro />
-        <PastPrompts pastData={pastData} />
-      </div>
+        <div className="flex flex-col gap-5 md:gap-[40px] pt-5 md:pt-16 items-center justify-center">
+          <Intro />
+          <PastPrompts pastData={pastData} />
+        </div>
       ) : (
-      <div className="gap-5 w-full py-10 md:pt-16 h-[520px] px-0 md:px-16 lg:px-32 relative overflow-x-auto items-center justify-center">
-        {messages.map((message) => (
-        <Fragment key={message.id}>
-          {message.sender === "user" ? (
-          <UserInput key={message.id} text={message.text} />
-          ) : (
-          <AIresponse loading={loading} text={message.text} />
-          )}
-        </Fragment>
-        ))}
-      </div>
+        <div className="gap-5 w-full py-10 md:pt-16 h-[520px] px-0 md:px-16 lg:px-32 relative overflow-x-auto items-center justify-center">
+          {messages.map((message) => (
+            <Fragment key={message.id}>
+              {message.sender === "user" ? (
+                <UserInput key={message.id} text={message.text} />
+              ) : (
+                <AIresponse loading={loading} text={message.text} />
+              )}
+            </Fragment>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
       )}
       <ChatBox handleSubmit={handleSubmit} input={input} setInput={setInput} />
     </section>
