@@ -18,27 +18,27 @@ const data = {
   navMain: [
     {
       title: "New",
-      url: "#",
+      url: "/",
       icon: Plus,
     },
     {
       title: "History",
-      url: "#",
+      url: "/history",
       icon: History,
     },
     {
       title: "Starred",
-      url: "#",
+      url: "/starred",
       icon: Star,
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/setting",
       icon: Settings,
     },
     {
       title: "Profile",
-      url: "#",
+      url: "/profile",
       icon: CircleUserRound,
     },
   ],
@@ -49,10 +49,12 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     name: string;
     email: string;
     avatar: string;
+
   };
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
+
   return (
     <Sidebar collapsible="icon" {...props}>
     <SidebarHeader className=" flex justify-center items-start border-b group-data-[collapsible=icon]:items-center px-[14px] py-5 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:py-4">

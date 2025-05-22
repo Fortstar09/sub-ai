@@ -6,26 +6,6 @@ import { parseStringify } from "../utils";
 import { appwriteConfig } from "../appwrite/config";
 import { ID, Query } from "node-appwrite";
 
-//
-
-export const getUserInfo = async ({ userId }: getUserInfoProps) => {
-  try {
-    const { databases } = await createAdminClient();
-
-    const user = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      [Query.equal("userId", [userId])]
-    );
-
-    return parseStringify(user.documents[0]);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-//
-
 export const signIn = async ({ email, password }: signInProps) => {
   try {
     const { account, databases } = await createAdminClient();
@@ -148,36 +128,30 @@ export const signUp = async ({ email, password, fullname }: SignUpParams) => {
       secure: true,
     });
 
-
     const message = {
       status: "success",
       message: "User created successfully",
     };
 
     return parseStringify(message);
-
   } catch (error) {
     console.error("Error", error);
   }
 };
 
-//
-
 export async function getLoggedInUser() {
   try {
     const { account } = await createSessionClient();
     const result = await account.get();
+    const userInfo = parseStringify(result);
 
-    // const user = await getUserInfo({ userId: result.$id})
-
-    return parseStringify(result);
+    return userInfo;
   } catch (error) {
     console.log(error);
     return null;
   }
 }
 
-// Create a function for logout
 export const signOut = async () => {
   try {
     const { account } = await createSessionClient();
@@ -195,3 +169,88 @@ export const signOut = async () => {
     return { error: "Failed to sign out" };
   }
 };
+
+export const StoreStarred = async ({
+  ingredient,
+  response,
+  shouldDelete,
+}: StoreDataProps) => {
+  const { databases } = await createAdminClient();
+  try {
+    const user = await getLoggedInUser();
+    if (!user) throw new Error("User not logged in");
+
+    const userId = user.$id;
+
+    if (shouldDelete) {
+      // ✅ Delete logic
+      const found = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.storageCollectionId,
+        [
+          Query.equal("ingredient", ingredient),
+          Query.equal("response", response),
+          Query.equal("userId", userId),
+        ]
+      );
+
+      if (found.total === 0) {
+        await databases.createDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.storageCollectionId,
+          ID.unique(),
+          {
+            userId,
+            ingredient,
+            response,
+            responseId: ID.unique(),
+          }
+        );
+
+        console.log("starred message");
+        return "Starred";
+      }
+
+      for (const doc of found.documents) {
+        await databases.deleteDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.storageCollectionId,
+          doc.$id
+        );
+      }
+
+      console.log("Deleted starred message(s)");
+      return "Unstarred";
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const getStarred = async () => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const user = await getLoggedInUser();
+    if (!user) throw new Error("User not logged in");
+
+    const userId = user.$id;
+    const starred = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.storageCollectionId,
+      [Query.equal("userId", userId)]
+    );
+
+    return parseStringify(starred);
+
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+// StoreStarred({
+//   ingredient: "ingredient",
+//   response: ["strore", "here", "place", "job"],
+// });

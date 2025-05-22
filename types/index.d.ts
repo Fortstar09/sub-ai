@@ -24,3 +24,10 @@ declare interface getUserInfoProps {
     email: string;
     password: string;
   };
+
+
+    declare type StoreDataProps = {
+      ingredient: string;
+      response: string[];
+      shouldDelete?: boolean
+  };

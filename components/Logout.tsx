@@ -14,7 +14,7 @@ const Logout = () => {
   };
 
   return (
-    <div onClick={handleLogout}>
+    <div onClick={handleLogout} className='cursor-pointer'>
       <LogOut size={19} />
     </div>
   )

@@ -11,8 +11,9 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
   const user = {
     name: loggedIn.name,
     email: loggedIn.email,
-   avatar: "/icon/user.svg",
+    avatar: "/icon/user.svg",
   };
+
 
   return (
     <SidebarProvider>
