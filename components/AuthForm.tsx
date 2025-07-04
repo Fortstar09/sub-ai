@@ -127,7 +127,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     type="email"
                     className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
             text-[#475367]"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your email"
                     {...field}
                   />
                 </FormControl>
@@ -146,7 +146,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     type="password"
                     className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
             text-[#475367]"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your password"
                     {...field}
                   />
                 </FormControl>
