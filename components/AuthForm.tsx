@@ -59,7 +59,7 @@ const AuthForm = ({ type }: { type: string }) => {
         toast(`${response.status}: ${response.message}`);
 
         if (response.status === "success") {
-          router.push("/");
+          router.push("/dashboard");
         }
       }
 
@@ -74,7 +74,7 @@ const AuthForm = ({ type }: { type: string }) => {
         toast(`${response.status}: ${response.message}`);
 
         if (response.status === "success") {
-          router.push("/");
+          router.push("/dashboard");
         } 
       }
     } catch (error) {

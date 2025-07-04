@@ -2,24 +2,25 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { getLoggedInUser } from "@/lib/actions/user.actions";
 import { redirect } from "next/navigation";
+import { UserProvider } from "../context/UserContext";
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
   const loggedIn = await getLoggedInUser();
 
-  if (!loggedIn) redirect("/sign-in");
-
-  const user = {
-    name: loggedIn.name,
-    email: loggedIn.email,
-    avatar: "/icon/user.svg",
+const user = {
+    name: loggedIn?.name || '',
+    email: loggedIn?.email || ''
   };
 
+  if (!loggedIn) redirect("/sign-in");
 
   return (
-    <SidebarProvider>
-      <AppSidebar user={user} />
-      {children}
-    </SidebarProvider>
+    <UserProvider user={user}>
+      <SidebarProvider>
+        <AppSidebar />
+        {children}
+      </SidebarProvider>
+    </UserProvider>
   );
 };
 
