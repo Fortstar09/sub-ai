@@ -11,6 +11,7 @@ type Message = {
   id: number;
   sender: "user" | "bot";
   text: string;
+  isLoading?: boolean;
 };
 
 const pastData = [
@@ -21,6 +22,7 @@ const pastData = [
   "butter",
   "bell pepper",
   "almond",
+  "Pepperoni",
 ];
 
 const displayError = {
@@ -32,7 +34,6 @@ const displayError = {
 const MainContent = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // scroll to bottom function
@@ -45,11 +46,13 @@ const MainContent = () => {
     }
   };
 
+  // scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
     console.log(messages);
   }, [messages]);
 
+  // Handle prompt from past prompts
   const handlePrompt = async (prompt: string) => {
     console.log(prompt);
 
@@ -60,7 +63,6 @@ const MainContent = () => {
     };
 
     setMessages((prev) => [...prev, promptMessage]);
-    setLoading(false);
 
     try {
       const response = await fetch("/api/chat", {
@@ -99,7 +101,6 @@ const MainContent = () => {
 
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -111,20 +112,30 @@ const MainContent = () => {
     // scroll to bottom
     scrollToBottom();
 
+
     // check if user has entered a message
     if (!input.trim()) return;
 
-    // create a user message
+    // 1. Create user message
     const userMessage: Message = {
       id: Date.now(),
       sender: "user",
       text: input.trim(),
     };
 
-    // Store user message in the message state
-    setMessages((prev) => [...prev, userMessage]);
+    // 2. Create placeholder bot message
+    const tempBotMessage: Message = {
+      id: Date.now() + 1,
+      sender: "bot",
+      text: "```json{}```", // could be "..." or a spinner in UI
+      isLoading: true, // optional flag
+    };
+
+    // 3. Update chat with both messages
+    setMessages((prev) => [...prev, userMessage, tempBotMessage]);
     setInput("");
-    setLoading(false);
+
+    console.log(messages);
 
     // Sending to the api and get response back
     try {
@@ -140,34 +151,38 @@ const MainContent = () => {
       const data = await response.json();
 
       if (response.ok) {
-        const botMessage: Message = {
-          id: Date.now() + 1,
-          sender: "bot",
-          text: data.message,
-        };
-
-        setMessages((prev) => [...prev, botMessage]);
+        // 5. Replace loading message with real bot message
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempBotMessage.id
+              ? { ...msg, text: data.message, isLoading: false }
+              : msg
+          )
+        );
       } else {
-        console.log("error here");
-        const errorMessage: Message = {
-          id: Date.now() + 1,
-          sender: "bot",
-          text: JSON.stringify(displayError),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempBotMessage.id
+              ? { ...msg, text: JSON.stringify(displayError), isLoading: false }
+              : msg
+          )
+        );
       }
     } catch (error) {
       console.error("Error fetching chat:", error);
 
-      const errorMessage: Message = {
-        id: Date.now() + 1,
-        sender: "bot",
-        text: "An Unexpected error occurred.",
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempBotMessage.id
+            ? {
+                ...msg,
+                text: "Network error. Please try again.",
+                isLoading: false,
+              }
+            : msg
+        )
+      );
     } finally {
-      setLoading(false);
     }
   };
 
@@ -188,7 +203,7 @@ const MainContent = () => {
                 </AnimatePresence>
               ) : (
                 <>
-                  <AIresponse loading={loading} text={message.text} />
+                  <AIresponse isLoading={message.isLoading ?? false } text={message.text} />
                 </>
               )}
               <div ref={messagesEndRef} />

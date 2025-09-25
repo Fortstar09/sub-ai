@@ -27,9 +27,9 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
-  --color-brand: var(--brand);
-  --color-brandLight: var(--brandLight);
-  --color-black1: var(--black1);
+  --color-brand: #1BB425;
+  --color-brandLight: rgb(89, 255, 100)5;
+  --color-black1: #072206;
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -58,7 +58,6 @@
   --card: oklch(1 0 0);
   --brand: #1BB425;
   --brandLight:rgb(89, 255, 100)5;
-  --black1:#072206;
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);

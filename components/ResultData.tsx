@@ -44,7 +44,6 @@ const ResultData = ({ jsonObject }: ResultDataProps) => {
                 key={index}
                 id={index + 1}
                 name={item.name}
-                ratio={item.ratio}
                 notes={item.notes}
               />
             ))
@@ -72,11 +71,10 @@ export default ResultData;
 interface EachResultProps {
   id: number;
   name: string;
-  ratio: string;
   notes: string;
 }
 
-const EachResult = ({ id, name, ratio, notes }: EachResultProps) => {
+const EachResult = ({ id, name, notes }: EachResultProps) => {
   return (
     <AnimatePresence>
       <motion.div
@@ -88,7 +86,6 @@ const EachResult = ({ id, name, ratio, notes }: EachResultProps) => {
       >
         <p className="text-base font-semibold text-[#475367]">
           {id}. {name}{" "}
-          <span className="flex text-xs text-black">({ratio})</span>
         </p>
         <p className="text-[14px] max-w-[320px] font-normal text-[#98A2B3] leading-[20px]">
           {notes}

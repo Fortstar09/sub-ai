@@ -8,7 +8,7 @@ import AiLogoText from "./AiLogoText";
 import { StoreStarred } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 
-const AIresponse = ({ text, loading }: { text: string; loading: boolean }) => {
+const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) => {
   const [likes, setLikes] = useState(true);
   const [dislikes, setDislikes] = useState(false);
   const [star, setStar] = useState(false);
@@ -68,9 +68,9 @@ const AIresponse = ({ text, loading }: { text: string; loading: boolean }) => {
   };
 
   return (
-    <div className="flex flex-col gap-3 mb-20 md:mb-14 justify-start w-full">
+    <div className="flex flex-col gap-3.5 mb-20 md:mb-14 justify-start w-full">
       <AiLogoText />
-      {loading ? (
+      {isLoading ? (
         <div className="flex gap-1 -mt-1 ml-3 md:ml-6">
           <span className="circle"></span>
           <span className="circle"></span>
@@ -81,6 +81,7 @@ const AIresponse = ({ text, loading }: { text: string; loading: boolean }) => {
           <ResultData jsonObject={jsonObject} />
 
           <div className="flex justify-end items-center gap-5">
+            <span>{isLoading}</span>
             <LikeButton handleLike={handleLike} likes={likes} />
             <DislikeButton handleDislike={handleDislike} dislikes={dislikes} />
             <CopyButton handleStar={addToStar} star={star} />

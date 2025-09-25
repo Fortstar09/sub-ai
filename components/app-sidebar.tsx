@@ -1,6 +1,6 @@
 "use client"
 import type * as React from "react"
-import {CircleUserRound, History, Plus, Settings, Star } from "lucide-react"
+import {History, Plus, Settings, Star } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -35,11 +35,6 @@ const data = {
       title: "Settings",
       url: "/setting",
       icon: Settings,
-    },
-    {
-      title: "Profile",
-      url: "/profile",
-      icon: CircleUserRound,
     },
   ],
 }
