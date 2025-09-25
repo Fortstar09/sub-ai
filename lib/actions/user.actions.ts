@@ -186,7 +186,7 @@ export const StoreStarred = async ({
       // ✅ Delete logic
       const found = await databases.listDocuments(
         appwriteConfig.databaseId,
-        appwriteConfig.storageCollectionId,
+        appwriteConfig.starredCollectionId,
         [
           Query.equal("ingredient", ingredient),
           Query.equal("response", response),
@@ -197,7 +197,7 @@ export const StoreStarred = async ({
       if (found.total === 0) {
         await databases.createDocument(
           appwriteConfig.databaseId,
-          appwriteConfig.storageCollectionId,
+          appwriteConfig.starredCollectionId,
           ID.unique(),
           {
             userId,
@@ -214,7 +214,7 @@ export const StoreStarred = async ({
       for (const doc of found.documents) {
         await databases.deleteDocument(
           appwriteConfig.databaseId,
-          appwriteConfig.storageCollectionId,
+          appwriteConfig.starredCollectionId,
           doc.$id
         );
       }
@@ -238,7 +238,7 @@ export const getStarred = async () => {
     const userId = user.$id;
     const starred = await databases.listDocuments(
       appwriteConfig.databaseId,
-      appwriteConfig.storageCollectionId,
+      appwriteConfig.starredCollectionId,
       [Query.equal("userId", userId)]
     );
 

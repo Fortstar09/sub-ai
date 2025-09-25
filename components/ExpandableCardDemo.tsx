@@ -182,34 +182,38 @@ export function ExpandableCardDemo() {
         }}
         className="mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start gap-4"
       >
-        {starredCards.length > 0 ? starredCards.map((card) => (
-          <motion.div
-            layoutId={card.responseId}
-            key={card.responseId}
-            onClick={() => setActive(card)}
-            className="py-4 flex flex-col  hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer"
-          >
+        {starredCards.length > 0 ? (
+          starredCards.map((card) => (
             <motion.div
-              initial={{ x: 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -100, opacity: 0 }}
-              transition={{
-          duration: 1,
-          staggerChildren: 0.8,
-              }}
-              className="flex gap-4 flex-col  w-full"
+              layoutId={card.responseId}
+              key={card.responseId}
+              onClick={() => setActive(card)}
+              className="py-4 flex flex-col  hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer"
             >
-              <BentoGridItem
-          title={card.ingredient}
-          description={`Click the card to view the substitute for ${card.ingredient}`}
-          header={<Skeleton className="h-32 w-full bg-neutral-200 " />}
-          icon={<SparklesIcon className="h-4 w-4 text-neutral-500" />}
-          className="md:col-span-2"
-              />
+              <motion.div
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -100, opacity: 0 }}
+                transition={{
+                  duration: 1,
+                  staggerChildren: 0.8,
+                }}
+                className="flex gap-4 flex-col  w-full"
+              >
+                <BentoGridItem
+                  title={card.ingredient}
+                  description={`Click the card to view the substitute for ${card.ingredient}`}
+                  header={<Skeleton className="h-32 w-full bg-neutral-200 " />}
+                  icon={<SparklesIcon className="h-4 w-4 text-neutral-500" />}
+                  className="md:col-span-2"
+                />
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )) : (
-          <h2 className="text-black1 mt-3 text-base">No starred sub ingredient yet</h2>
+          ))
+        ) : (
+          <h2 className="text-black1 mt-3 text-base">
+            No starred sub ingredient yet
+          </h2>
         )}
       </motion.div>
     </>
