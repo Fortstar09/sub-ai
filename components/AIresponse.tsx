@@ -5,7 +5,7 @@ import LikeButton from "./LikeButton";
 import CopyButton from "./StarButton";
 import DislikeButton from "./DislikeButton";
 import AiLogoText from "./AiLogoText";
-import { StoreStarred } from "@/lib/actions/user.actions";
+import { storeStarred } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 
 const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) => {
@@ -39,7 +39,7 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
     if (!star) {
       setStar(true);
 
-      const starResponse = await StoreStarred({
+      const starResponse = await storeStarred({
         ingredient: jsonObject.ingredient,
         response: [JSON.stringify(jsonObject.substitutes)],
         shouldDelete: true,
@@ -53,7 +53,7 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
     } else {
       setStar(false);
 
-      const starResponse = await StoreStarred({
+      const starResponse = await storeStarred({
         ingredient: jsonObject.ingredient,
         response: [JSON.stringify(jsonObject.substitutes)],
         shouldDelete: true,

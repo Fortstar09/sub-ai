@@ -11,7 +11,7 @@ const history = () => {
       <div className="flex-col justify-start flex gap-16 py-8 px-0 md:py-8 md:px-8 lg:px-24">
         <div className="flex items-center justify-between">
           <p className="text-2xl font-medium text-black1 ">
-            Ingredient history{" "}
+            Chat history{" "}
           </p>
           <Button
             variant="outline"

@@ -170,7 +170,7 @@ export const signOut = async () => {
   }
 };
 
-export const StoreStarred = async ({
+export const storeStarred = async ({
   ingredient,
   response,
   shouldDelete,
@@ -249,6 +249,89 @@ export const getStarred = async () => {
     throw error;
   }
 };
+
+export const storeHistory = async ({
+  ingredient,
+  response,
+  shouldDelete,
+}: StoreDataProps) => {
+  const { databases } = await createAdminClient();
+  try {
+    const user = await getLoggedInUser();
+    if (!user) throw new Error("User not logged in");
+
+    const userId = user.$id;
+
+    if (shouldDelete) {
+      // ✅ Delete logic
+      const found = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.starredCollectionId,
+        [
+          Query.equal("ingredient", ingredient),
+          Query.equal("response", response),
+          Query.equal("userId", userId),
+        ]
+      );
+
+      if (found.total === 0) {
+        await databases.createDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.starredCollectionId,
+          ID.unique(),
+          {
+            userId,
+            ingredient,
+            response,
+            responseId: ID.unique(),
+          }
+        );
+
+        console.log("starred message");
+        return "Starred";
+      }
+
+      for (const doc of found.documents) {
+        await databases.deleteDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.starredCollectionId,
+          doc.$id
+        );
+      }
+
+      console.log("Deleted starred message(s)");
+      return "Unstarred";
+    }
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const getHistory = async () => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const user = await getLoggedInUser();
+    if (!user) throw new Error("User not logged in");
+
+    const userId = user.$id;
+    const history = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.historyCollectionId,
+      [Query.equal("userId", userId)]
+    );
+
+    return parseStringify(history);
+
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+
+
 
 // StoreStarred({
 //   ingredient: "ingredient",
