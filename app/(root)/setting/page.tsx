@@ -1,10 +1,13 @@
-import Notfound from "@/components/Notfound";
+import PageHeader from "@/components/PageHeader";
 import PageWrapper from "@/components/PageWrapper";
+import SettingContent from "@/components/SettingContent";
 
 const setting = () => {
   return (
     <PageWrapper>
-      <Notfound notFound="Setting" />
+      <PageHeader title="Settings">
+        <SettingContent />
+      </PageHeader>
     </PageWrapper>
   );
 };
