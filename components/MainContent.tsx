@@ -54,64 +54,83 @@ const MainContent = () => {
 
   // Handle prompt from past prompts
   const handlePrompt = async (prompt: string) => {
-    console.log(prompt);
 
-    const promptMessage: Message = {
+    // 1. Create user message
+    const userMessage: Message = {
       id: Date.now(),
       sender: "user",
-      text: prompt,
+      text: prompt.trim(),
     };
 
-    setMessages((prev) => [...prev, promptMessage]);
+    // 2. Create placeholder bot message
+    const tempBotMessage: Message = {
+      id: Date.now() + 1,
+      sender: "bot",
+      text: "```json{}```", // Placeholder (could be "..." or a spinner in UI)
+      isLoading: true, // Optional flag for loading state
+    };
 
+    // 3. Update messages with both user and placeholder bot message
+    setMessages((prev) => [...prev, userMessage, tempBotMessage]);
+
+    // 4. Make API call
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: promptMessage.text }),
+        body: JSON.stringify({ message: userMessage.text }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        const botMessage: Message = {
-          id: Date.now() + 1,
-          sender: "bot",
-          text: data.message,
-        };
-
-        setMessages((prev) => [...prev, botMessage]);
+        // 5. Replace placeholder with actual bot response
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempBotMessage.id
+              ? { ...msg, text: data.message, isLoading: false }
+              : msg
+          )
+        );
       } else {
-        const errorMessage: Message = {
-          id: Date.now() + 1,
-          sender: "bot",
-          text: data.error || "Something went wrong",
-        };
-        setMessages((prev) => [...prev, errorMessage]);
+        // 6. Replace placeholder with error message
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === tempBotMessage.id
+              ? {
+                  ...msg,
+                  text: data.error || "Something went wrong",
+                  isLoading: false,
+                }
+              : msg
+          )
+        );
       }
     } catch (error) {
       console.error("Error fetching chat:", error);
-      const errorMessage: Message = {
-        id: Date.now() + 1,
-        sender: "bot",
-        text: "An Unexpected error occurred.",
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
+      // 7. Replace placeholder with network error message
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === tempBotMessage.id
+            ? {
+                ...msg,
+                text: "Network error. Please try again.",
+                isLoading: false,
+              }
+            : msg
+        )
+      );
     }
   };
 
   // Handle submit
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     // scroll to bottom
     scrollToBottom();
-
 
     // check if user has entered a message
     if (!input.trim()) return;
@@ -203,7 +222,10 @@ const MainContent = () => {
                 </AnimatePresence>
               ) : (
                 <>
-                  <AIresponse isLoading={message.isLoading ?? false } text={message.text} />
+                  <AIresponse
+                    isLoading={message.isLoading ?? false}
+                    text={message.text}
+                  />
                 </>
               )}
               <div ref={messagesEndRef} />
