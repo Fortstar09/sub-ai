@@ -1,40 +1,27 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ResultData from "./ResultData";
-import LikeButton from "./LikeButton";
-import CopyButton from "./StarButton";
-import DislikeButton from "./DislikeButton";
+import StarButton from "./StarButton";
 import AiLogoText from "./AiLogoText";
 import { storeHistory, storeStarred } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
+import Image from "next/image";
+import CopyButton from "./CopyButton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
-const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) => {
-  const [likes, setLikes] = useState(true);
-  const [dislikes, setDislikes] = useState(false);
+const AIresponse = ({
+  text,
+  isLoading,
+}: {
+  text: string;
+  isLoading: boolean;
+}) => {
+  const [copy, setCopy] = useState(false);
   const [star, setStar] = useState(false);
 
   const cleanedText = text.replace(/^```json|```$/gm, "").trim();
 
   const jsonObject = JSON.parse(cleanedText);
-
-  const handleLike = () => {
-    if (likes) {
-      setLikes(false);
-      setDislikes(false);
-    } else {
-      setLikes(true);
-    }
-  };
-
-  
-  const handleDislike = () => {
-    if (!dislikes) {
-      setLikes(true);
-      setDislikes(true);
-    } else {
-      setDislikes(false);
-    }
-  };
 
   // Function to store history
   const addToHistory = async () => {
@@ -51,10 +38,12 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
     }
   };
 
-  // Call the function when the ingredient is valid
-  if (jsonObject.ingredient) {
-    addToHistory();
-  }
+  // Use useEffect to call the function when the ingredient is valid
+  useEffect(() => {
+    if (jsonObject.ingredient) {
+      addToHistory();
+    }
+  }, [jsonObject.ingredient]);
 
   const addToStar = async () => {
     if (!star) {
@@ -102,10 +91,38 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
           <ResultData jsonObject={jsonObject} />
 
           <div className="flex justify-end items-center gap-5">
-            <span>{isLoading}</span>
-            <LikeButton handleLike={handleLike} likes={likes} />
-            <DislikeButton handleDislike={handleDislike} dislikes={dislikes} />
-            <CopyButton handleStar={addToStar} star={star} />
+            <TooltipDemo
+              trigger={
+                <Image
+                  src="/icon/regenerate.svg"
+                  width={20}
+                  height={20}
+                  alt="share"
+                  className="cursor-pointer"
+                />
+              }
+              text="Regenerate"
+            />
+            <TooltipDemo
+              trigger={<CopyButton setCopy={setCopy} copy={copy} />}
+              text="Copy to clipboard"
+            />
+            <TooltipDemo
+              trigger={
+                <Image
+                  src="/icon/share.svg"
+                  width={20}
+                  height={20}
+                  alt="share"
+                  className="cursor-pointer"
+                />
+              }
+              text="Share"
+            />
+            <TooltipDemo
+              trigger={<StarButton handleStar={addToStar} star={star} />}
+              text="Star"
+            />
           </div>
         </div>
       )}
@@ -114,3 +131,20 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
 };
 
 export default AIresponse;
+
+const TooltipDemo = ({
+  trigger,
+  text,
+}: {
+  text: string;
+  trigger: React.ReactNode;
+}) => {
+  return (
+    <Tooltip>
+      <TooltipTrigger className="Button">{trigger}</TooltipTrigger>
+      <TooltipContent className="TooltipContent" side="top">
+        <p>{text}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
