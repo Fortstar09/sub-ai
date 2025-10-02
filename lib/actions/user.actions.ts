@@ -243,7 +243,6 @@ export const getStarred = async () => {
     );
 
     return parseStringify(starred);
-
   } catch (error) {
     console.log(error);
     throw error;
@@ -253,7 +252,6 @@ export const getStarred = async () => {
 export const storeHistory = async ({
   ingredient,
   response,
-  shouldDelete,
 }: StoreDataProps) => {
   const { databases } = await createAdminClient();
   try {
@@ -261,46 +259,27 @@ export const storeHistory = async ({
     if (!user) throw new Error("User not logged in");
 
     const userId = user.$id;
+    // ✅ check if ingredient already exists
+    const found = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.historyCollectionId,
+      [Query.equal("ingredient", ingredient)]
+    );
 
-    if (shouldDelete) {
-      // ✅ Delete logic
-      const found = await databases.listDocuments(
+    if (found.total === 0) {
+      await databases.createDocument(
         appwriteConfig.databaseId,
-        appwriteConfig.starredCollectionId,
-        [
-          Query.equal("ingredient", ingredient),
-          Query.equal("response", response),
-          Query.equal("userId", userId),
-        ]
+        appwriteConfig.historyCollectionId,
+        ID.unique(),
+        {
+          userId,
+          ingredient,
+          response,
+          responseId: ID.unique(),
+        }
       );
-
-      if (found.total === 0) {
-        await databases.createDocument(
-          appwriteConfig.databaseId,
-          appwriteConfig.starredCollectionId,
-          ID.unique(),
-          {
-            userId,
-            ingredient,
-            response,
-            responseId: ID.unique(),
-          }
-        );
-
-        console.log("starred message");
-        return "Starred";
-      }
-
-      for (const doc of found.documents) {
-        await databases.deleteDocument(
-          appwriteConfig.databaseId,
-          appwriteConfig.starredCollectionId,
-          doc.$id
-        );
-      }
-
-      console.log("Deleted starred message(s)");
-      return "Unstarred";
+      console.log("store history message");
+      return ;
     }
   } catch (error) {
     console.log(error);
@@ -323,15 +302,11 @@ export const getHistory = async () => {
     );
 
     return parseStringify(history);
-
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
-
-
-
 
 // StoreStarred({
 //   ingredient: "ingredient",

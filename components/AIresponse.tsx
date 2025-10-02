@@ -5,7 +5,7 @@ import LikeButton from "./LikeButton";
 import CopyButton from "./StarButton";
 import DislikeButton from "./DislikeButton";
 import AiLogoText from "./AiLogoText";
-import { storeStarred } from "@/lib/actions/user.actions";
+import { storeHistory, storeStarred } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 
 const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) => {
@@ -26,6 +26,7 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
     }
   };
 
+  
   const handleDislike = () => {
     if (!dislikes) {
       setLikes(true);
@@ -34,6 +35,26 @@ const AIresponse = ({ text, isLoading }: { text: string; isLoading: boolean }) =
       setDislikes(false);
     }
   };
+
+  // Function to store history
+  const addToHistory = async () => {
+    try {
+      if (jsonObject.ingredient) {
+        await storeHistory({
+          ingredient: jsonObject.ingredient,
+          response: [JSON.stringify(jsonObject.substitutes)],
+          shouldDelete: true,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to store history:", error);
+    }
+  };
+
+  // Call the function when the ingredient is valid
+  if (jsonObject.ingredient) {
+    addToHistory();
+  }
 
   const addToStar = async () => {
     if (!star) {
