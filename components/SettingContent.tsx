@@ -1,7 +1,13 @@
 "use client";
 import React from "react";
 import { Button } from "./ui/button";
-import { ChevronDown, CornerDownLeft, Trash } from "lucide-react";
+import {
+  ArrowRightFromLine,
+  ChevronDown,
+  CornerDownLeft,
+  Plus,
+  Trash,
+} from "lucide-react";
 import { useUser } from "@/app/context/UserContext";
 import {
   AlertDialog,
@@ -14,16 +20,33 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import Image from "next/image";
+
+interface User {
+  email: string;
+  name: string;
+}
 
 const SettingContent = () => {
   const userContext = useUser();
   if (!userContext || !userContext.user) {
     return null;
   }
-  const { user } = userContext;
+  const { user } = userContext as { user: User };
   return (
     <div className="flex flex-col gap-9">
       {/* PROFILE SETTING CONTENT */}
+
       <div className="flex flex-col gap-7">
         <h3 className="uppercase text-[#98A2B3] text-sm font-normal">
           Profile
@@ -33,17 +56,79 @@ const SettingContent = () => {
         <EachSettingList
           heading="Username"
           subheading={user.name}
-          action
-          actionText="Update Username"
+          actionComponent={
+            <AlertDialog>
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
+                Update Username
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                    Update Username
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-base font-normal text-[#475367]">
+                    Update your username by entering a new one
+                  </AlertDialogDescription>
+                  <div className="grid w-full items-center gap-1 mt-10 ">
+                    <Label
+                      htmlFor="username"
+                      className="text-[#475367] text-sm font-semibold"
+                    >
+                      New username
+                    </Label>
+                    <Input
+                      type="username"
+                      id="username"
+                      placeholder="e.g John"
+                      className="p-4.5 min-h-14 text-[#475367] w-full text-sm placeholder:text-[#98A2B3]"
+                    />
+                  </div>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
+                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-green-600 hover:bg-green-600/70 cursor-pointer">
+                    Update <Plus />
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          }
         />
         <EachSettingList
           heading="Log Out"
           subheading={`You are signed in as ${user.email}`}
-          action
-          actionText="Log out"
+          actionComponent={
+            <AlertDialog>
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
+                Log out
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                    Log out
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-base font-normal text-[#475367]">
+                    Are you sure you want to log out your account from Sub Ai?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
+                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                    Log out <ArrowRightFromLine />
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          }
         />
       </div>
+
       {/* GENERAL SETTING CONTENT */}
+
       <div className="flex flex-col gap-7">
         <h3 className="uppercase text-[#98A2B3] text-sm font-normal">
           GENERAL
@@ -51,24 +136,95 @@ const SettingContent = () => {
         <EachSettingList
           heading="Application Language"
           subheading="English"
-          action
-          actionText="English"
-          icon={<ChevronDown size={16} />}
+          actionComponent={
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
+                <Image
+                  src="/flag/en.svg"
+                  alt="eng"
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+                English
+                <ChevronDown size={16} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="min-w-[144px]">
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer">
+                  <Image
+                    src="/flag/en.svg"
+                    alt="eng"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer">
+                  <Image
+                    src="/flag/es.svg"
+                    alt="es"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                  Español
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer" >
+                  <Image
+                    src="/flag/de.svg"
+                    alt="de"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                  Deutsch
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer">
+                  <Image
+                    src="/flag/fr.svg"
+                    alt="fr"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                  Francais
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
         />
         <EachSettingList
           heading="Theme Mode"
           subheading="Default (Match System)"
-          action
-          actionText="Default"
-          icon={<ChevronDown size={16} />}
+          actionComponent={
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
+                Default
+                <ChevronDown size={16} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>Default</DropdownMenuItem>
+                <DropdownMenuItem>Light</DropdownMenuItem>
+                <DropdownMenuItem>Dark</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
         />
         <EachSettingList
           heading="About Sub AI"
-          action
-          actionText="Check About us"
-          icon={<CornerDownLeft size={16} />}
+          actionComponent={
+            <Button
+              variant="outline"
+              className="h-9 border-[#EEEEEE] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-700 hover:text-white shadow-none"
+            >
+              Check About us
+              <CornerDownLeft size={16} />
+            </Button>
+          }
         />
       </div>
+
       {/* DANGER SETTING CONTENT */}
       <div className="flex flex-col gap-7">
         <h3 className="uppercase text-[#98A2B3] text-sm font-normal">
@@ -77,43 +233,66 @@ const SettingContent = () => {
         <EachSettingList
           heading="Delete History"
           subheading="Deleting your ingredient history is permanent and irreversible"
-          action
-          actionText="Delete History"
+          actionComponent={
+            <AlertDialog>
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
+                Delete History
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                    Delete History
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-base font-normal text-[#475367]">
+                    Deleting your history will permanently remove all past
+                    conversations from this account. This action cannot be
+                    undone. Click Confirm to proceed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
+                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                    Confirm Delete <Trash />
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          }
         />
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col gap-0.5">
-            <h2 className="text-red-600 font-medium text-[17px]">
-              Delete Account
-            </h2>
-            <p className="text-[#475367] font-normal text-base">
-              Deleting your account is permanent and irreversible
-            </p>
-          </div>
-          <AlertDialog> 
-            <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-[#DF1C41] font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
-              Delete Account
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Account</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Deleting your account will erase your profile, chat history,
-                  and all associated data from our system. This action is
-                  permanent and cannot be reversed. Click Confirm to permanently
-                  delete your account.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
-                <AlertDialogCancel className="cursor-pointer">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction className="bg-red-600 hover:bg-red-600/70 cursor-pointer">
-                  Confirm Delete <Trash />
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <EachSettingList
+          heading="Delete History"
+          subheading="Deleting your ingredient history is permanent and irreversible"
+          actionComponent={
+            <AlertDialog>
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-[#DF1C41] font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
+                Delete Account
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                    Delete Account
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-base font-normal text-[#475367]">
+                    Deleting your account will erase your profile, chat history,
+                    and all associated data from our system. This action is
+                    permanent and cannot be reversed. Click Confirm to
+                    permanently delete your account.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
+                  <AlertDialogCancel className="shadow-none cursor-pointer border-[#EEEEEE] text-base font-semibold text-black1">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                    Confirm Delete <Trash />
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          }
+        />
       </div>
     </div>
   );
@@ -124,33 +303,21 @@ export default SettingContent;
 interface EachSettingListProps {
   heading: string;
   subheading?: string;
-  action?: boolean;
-  actionText?: string;
-  icon?: React.ReactNode;
+  actionComponent?: React.ReactNode;
 }
 
 const EachSettingList = ({
   heading,
   subheading,
-  action,
-  actionText,
-  icon,
+  actionComponent,
 }: EachSettingListProps) => {
   return (
     <div className="flex justify-between items-center">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-black1 font-medium text-[17px]">{heading}</h2>
+        <h2 className="text-black1 font-normal text-[17px]">{heading}</h2>
         <p className="text-[#475367] font-normal text-base">{subheading}</p>
       </div>
-      {action && (
-        <Button
-          variant="outline"
-          className="h-9 border-[#EEEEEE] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-700 hover:text-white shadow-none"
-        >
-          {actionText}
-          {icon}
-        </Button>
-      )}
+      {actionComponent}
     </div>
   );
 };

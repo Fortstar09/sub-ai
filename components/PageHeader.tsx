@@ -17,7 +17,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, start, children }) => {
         {start && (
           <Button
             variant="outline"
-            className="p-2 font-semibold text-black1 bg-[#EDEEF0] cursor-pointer"
+            className="p-2 font-semibold text-black1 bg-[#EDEEF0] cursor-pointer shadow-none"
           >
             <Link href="/dashboard" className="flex items-center gap-2">
               <Plus size={16} strokeWidth={2.5} color="#072206" />
