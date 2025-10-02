@@ -263,7 +263,7 @@ export const storeHistory = async ({
     const found = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.historyCollectionId,
-      [Query.equal("ingredient", ingredient)]
+      [Query.equal("ingredient", ingredient) && Query.equal("userId", userId)]
     );
 
     if (found.total === 0) {
@@ -279,7 +279,7 @@ export const storeHistory = async ({
         }
       );
       console.log("store history message");
-      return ;
+      return;
     }
   } catch (error) {
     console.log(error);
