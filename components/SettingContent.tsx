@@ -223,7 +223,7 @@ const SettingContent = () => {
               <DropdownMenuContent>
                 <DropdownMenuRadioGroup
                   value={theme}
-                  onValueChange={handleThemeChange}
+                  onValueChange={(value) => handleThemeChange(value as "light" | "dark" | "system")}
                 >
                   <DropdownMenuRadioItem value="system">
                     System
