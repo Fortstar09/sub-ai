@@ -24,11 +24,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import Image from "next/image";
+import { signOut } from "@/lib/actions/user.actions";
+import { toast } from "sonner";
+import { useTheme } from "@/app/context/ThemeContext";
 
 interface User {
   email: string;
@@ -37,10 +42,21 @@ interface User {
 
 const SettingContent = () => {
   const userContext = useUser();
+  const { theme, setTheme } = useTheme();
   if (!userContext || !userContext.user) {
     return null;
   }
   const { user } = userContext as { user: User };
+
+  const handleLogout = async () => {
+    await signOut();
+
+    toast("Successfully sign out");
+  };
+
+  const handleThemeChange = (value: "light" | "dark" | "system") => {
+    setTheme(value);
+  };
   return (
     <div className="flex flex-col gap-9">
       {/* PROFILE SETTING CONTENT */}
@@ -56,12 +72,12 @@ const SettingContent = () => {
           subheading={user.name}
           actionComponent={
             <AlertDialog>
-              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
                 Update Username
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                  <AlertDialogTitle className="text-black1 dark:text-white text-2xl font-semibold">
                     Update Username
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-base font-normal text-[#475367]">
@@ -83,10 +99,10 @@ const SettingContent = () => {
                   </div>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
-                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1">
+                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-green-600 hover:bg-green-600/70 cursor-pointer">
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] bg-green-600 hover:bg-green-600/70 cursor-pointer">
                     Update <Plus />
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -99,12 +115,12 @@ const SettingContent = () => {
           subheading={`You are signed in as ${user.email}`}
           actionComponent={
             <AlertDialog>
-              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
                 Log out
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                  <AlertDialogTitle className="text-black1 dark:text-white text-2xl font-semibold">
                     Log out
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-base font-normal text-[#475367]">
@@ -112,10 +128,13 @@ const SettingContent = () => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
-                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1">
+                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                  <AlertDialogAction
+                    className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] bg-red-600 hover:bg-red-600/70 cursor-pointer"
+                    onClick={handleLogout}
+                  >
                     Log out <ArrowRightFromLine />
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -128,7 +147,7 @@ const SettingContent = () => {
       {/* GENERAL SETTING CONTENT */}
 
       <div className="flex flex-col gap-7">
-        <h3 className="uppercase text-[#98A2B3] text-sm font-normal">
+        <h3 className="uppercase text-[#98A2B3]  text-sm font-normal">
           GENERAL
         </h3>
         <EachSettingList
@@ -136,7 +155,7 @@ const SettingContent = () => {
           subheading="English"
           actionComponent={
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
+              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
                 <Image
                   src="/flag/en.svg"
                   alt="eng"
@@ -148,7 +167,7 @@ const SettingContent = () => {
                 <ChevronDown size={16} />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="min-w-[144px]">
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer">
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
                   <Image
                     src="/flag/en.svg"
                     alt="eng"
@@ -158,7 +177,7 @@ const SettingContent = () => {
                   />
                   English
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer">
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
                   <Image
                     src="/flag/es.svg"
                     alt="es"
@@ -168,7 +187,7 @@ const SettingContent = () => {
                   />
                   Español
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer" >
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
                   <Image
                     src="/flag/de.svg"
                     alt="de"
@@ -178,7 +197,7 @@ const SettingContent = () => {
                   />
                   Deutsch
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 p-2 cursor-pointer">
+                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
                   <Image
                     src="/flag/fr.svg"
                     alt="fr"
@@ -194,17 +213,28 @@ const SettingContent = () => {
         />
         <EachSettingList
           heading="Theme Mode"
-          subheading="Default (Match System)"
+          subheading="System (match device theme)"
           actionComponent={
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
-                Default
+              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
+                {theme.charAt(0).toUpperCase() + theme.slice(1)}
                 <ChevronDown size={16} />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>Default</DropdownMenuItem>
-                <DropdownMenuItem>Light</DropdownMenuItem>
-                <DropdownMenuItem>Dark</DropdownMenuItem>
+                <DropdownMenuRadioGroup
+                  value={theme}
+                  onValueChange={handleThemeChange}
+                >
+                  <DropdownMenuRadioItem value="system">
+                    System
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="light">
+                    Light
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">
+                    Dark
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           }
@@ -214,7 +244,7 @@ const SettingContent = () => {
           actionComponent={
             <Button
               variant="outline"
-              className="h-9 border-[#EEEEEE] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-green-700 hover:text-white shadow-none"
+              className="h-9 border-[#EEEEEE] dark:border-[#1E1E1E] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-700 hover:text-white shadow-none"
             >
               Check About us
               <CornerDownLeft size={16} />
@@ -233,12 +263,12 @@ const SettingContent = () => {
           subheading="Deleting your ingredient history is permanent and irreversible"
           actionComponent={
             <AlertDialog>
-              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-black1 font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
                 Delete History
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                  <AlertDialogTitle className="text-black1 dark:text-white text-2xl font-semibold">
                     Delete History
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-base font-normal text-[#475367]">
@@ -248,10 +278,10 @@ const SettingContent = () => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
-                  <AlertDialogCancel className="shadow-none border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1">
+                  <AlertDialogCancel className="shadow-none dark:bg-transparent border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:text-white bg-[#E53051] hover:[#E53051]/70 cursor-pointer">
                     Confirm Delete <Trash />
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -264,12 +294,12 @@ const SettingContent = () => {
           subheading="Deleting your ingredient history is permanent and irreversible"
           actionComponent={
             <AlertDialog>
-              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] rounded-[8px] text-[#DF1C41] font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
+              <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E]  rounded-[8px] text-[#E53051] font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
                 Delete Account
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-black1 text-2xl font-semibold">
+                  <AlertDialogTitle className="text-black1 dark:text-white text-2xl font-semibold ">
                     Delete Account
                   </AlertDialogTitle>
                   <AlertDialogDescription className="text-base font-normal text-[#475367]">
@@ -280,10 +310,10 @@ const SettingContent = () => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
-                  <AlertDialogCancel className="shadow-none cursor-pointer border-[#EEEEEE] text-base font-semibold text-black1">
+                  <AlertDialogCancel className="shadow-none cursor-pointer dark:bg-transparent border-[#EEEEEE] dark:border-[#1E1E1E] text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:text-white dark:border-[#1E1E1E] bg-[#E53051] hover:bg-[#E53051]/70 cursor-pointer">
                     Confirm Delete <Trash />
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -312,7 +342,7 @@ const EachSettingList = ({
   return (
     <div className="flex justify-between items-center">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-black1 font-normal text-[17px]">{heading}</h2>
+        <h2 className="text-black1 dark:text-white font-normal text-[17px]">{heading}</h2>
         <p className="text-[#475367] font-normal text-base">{subheading}</p>
       </div>
       {actionComponent}

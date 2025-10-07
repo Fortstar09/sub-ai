@@ -1,9 +1,8 @@
+import { useTheme } from "@/app/context/ThemeContext";
 import { ArrowUpRight } from "lucide-react";
 import React from "react";
 
 const PastPrompts = ({ pastData, handlePrompt }: { pastData: string[], handlePrompt: (prompt: string) => void; }) => {
-
-
 
   return (
     <div className="flex flex-col gap-2 md:gap-5 items-center justify-center">
@@ -31,17 +30,18 @@ const EachPast = ({
   prompt: string;
   handlePrompt: (prompt: string) => void;
 }) => {
+  const { theme } = useTheme();
   return (
     <div
-      className="flex gap-1 py-1 pl-[7px] pr-[5px] cursor-pointer border bg-[#FAFAFA] w-fit border-[#EEEEEEEE] rounded-[40px] items-center justify-center"
+      className="flex gap-1 py-1 pl-[7px] pr-[5px] cursor-pointer border bg-[#FAFAFA] dark:bg-[#121212] w-fit border-[#EEEEEEEE] dark:border-[#1E1E1EEE] rounded-[40px] items-center justify-center"
       onClick={() => {
         handlePrompt(prompt);
       }}
     >
-      <p className="font-normal text-sm capitalize text-black1 leading-[16px]">
+      <p className="font-normal text-sm capitalize text-black1 dark:text-white leading-[16px]">
         {prompt}
       </p>
-      <ArrowUpRight size="16" color="#072206" />
+      <ArrowUpRight size="16" color={`${ theme === 'dark' ? '#FFFFFF':"#072206"}`} />
     </div>
   );
 };

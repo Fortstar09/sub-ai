@@ -148,7 +148,7 @@ const HistoryTab = () => {
         <div className="mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 items-start gap-4">
           {historyCards.map((card) => (
             <div
-              className="p-4 border w-full h-[173px] cursor-pointer overflow-hidden flex-col flex gap-1 border-[#EEEEEE] rounded-[20px]"
+              className="p-4 border w-full h-[173px] cursor-pointer overflow-hidden flex-col flex gap-1 border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[20px]"
               key={card.responseId}
             >
               <div className="flex items-center justify-between">
@@ -212,7 +212,7 @@ const HistoryTab = () => {
                 </Popover>
               </div>
               <div onClick={() => setActive(card)}>
-                <p className="text-xs text-[#D0D5DD] font-normal">Yesterday</p>
+                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">Yesterday</p>
                 <ol className="mt-1 list-decimal text-[#98A2B3] font-normal text-sm pl-4 space-y-1">
                   {JSON.parse(card.response).map(
                     (item: { name: string }, index: number) => (

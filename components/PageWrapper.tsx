@@ -18,7 +18,7 @@ const PageWrapper = ({
 
   return (
     <SidebarInset>
-      <header className="flex h-[65] border-b shrink-0 bg-white items-center gap-2 sticky top-0 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-[57]">
+      <header className="flex h-[65] border-b shrink-0 bg-white dark:bg-[#171717] items-center gap-2 sticky top-0 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-[57]">
         <div className="flex items-center justify-between px-4 w-full">
           <SidebarTrigger className="-ml-1" />
           <div className="flex justify-center gap-3 md:gap-0 items-center">
