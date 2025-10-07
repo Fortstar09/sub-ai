@@ -20,7 +20,7 @@ const ResultData = ({ jsonObject }: ResultDataProps) => {
     <AnimatePresence>
       {jsonObject.status === "success" ? (
         <motion.div
-          className="border-[#F4F6F5]  border max-w-fit rounded-[24px]"
+          className="border-[#F4F6F5] dark:border-[#1E1E1E]  border max-w-fit rounded-[24px]"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
@@ -31,7 +31,7 @@ const ResultData = ({ jsonObject }: ResultDataProps) => {
             delayChildren: 2, // optional: delay children start
           }}
         >
-          <h1 className="py-3 px-4 text-[17px]  text-black1 leading-[22px] font-semibold bg-[#FAFAFA] rounded-t-[24px] ">
+          <h1 className="py-3 px-4 text-[17px]  text-black1 dark:text-white leading-[22px] font-semibold bg-[#FAFAFA] dark:bg-[#121212] rounded-t-[24px] ">
             Here are some substitutes for{" "}
             <span className="font-bold capitalize">
               “{jsonObject.ingredient}”
@@ -50,14 +50,14 @@ const ResultData = ({ jsonObject }: ResultDataProps) => {
           }
         </motion.div>
       ) : jsonObject.status === "internet-error" ? (
-        <div className="border-[#F4F6F5] border max-w-fit rounded-[24px] p-4 bg-[#FAFAFA]">
-          <h1 className="text-[14px] max-w-[320px] font-normal text-[#98A2B3] leading-[20px]">
+        <div className="border-[#F4F6F5] dark:border-[#171717] border max-w-fit rounded-[24px] p-4 bg-[#FAFAFA] dark:bg-[#121212]">
+          <h1 className="text-[14px] max-w-[320px] font-normal text-[#98A2B3] dark:text-white leading-[20px]">
             {jsonObject.message}
           </h1>
         </div>
       ) : (
-        <div className="border-[#F4F6F5] border max-w-fit rounded-[24px] p-4 bg-[#FAFAFA]">
-          <h1 className="text-[14px] max-w-[320px] font-normal text-[#98A2B3] leading-[20px]">
+        <div className="border-[#F4F6F5] dark:border-[#171717] border max-w-fit rounded-[24px] p-4 bg-[#FAFAFA] dark:bg-[#121212]">
+          <h1 className="text-[14px] max-w-[320px] font-normal text-[#98A2B3] dark:text-white leading-[20px]">
             {jsonObject.message}
           </h1>
         </div>
@@ -82,7 +82,7 @@ const EachResult = ({ id, name, notes }: EachResultProps) => {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -100, opacity: 0 }}
         transition={{ duration: 1 }}
-        className="py-3 px-4 flex flex-col gap-2 border-b border-[#F4F6F5] last:border-none last:mb-2"
+        className="py-3 px-4 flex flex-col gap-2 border-b border-[#F4F6F5] dark:border-[#171717] last:border-none last:mb-2"
       >
         <p className="text-base font-semibold text-[#475367]">
           {id}. {name}{" "}

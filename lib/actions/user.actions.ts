@@ -308,7 +308,33 @@ export const getHistory = async () => {
   }
 };
 
-// StoreStarred({
-//   ingredient: "ingredient",
-//   response: ["strore", "here", "place", "job"],
-// });
+export const deleteAllHistory = async () => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const user = await getLoggedInUser();
+    if (!user) throw new Error("User not logged in");
+
+    const userId = user.$id;
+
+    const documents = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.historyCollectionId,
+      [Query.equal("userId", userId)]
+    );
+
+    for (const doc of documents.documents) {
+      await databases.deleteDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.historyCollectionId,
+        doc.$id
+      );
+    }
+    console.log("Deleted all history");
+    return { deleted: documents.documents.length };
+
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

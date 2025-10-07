@@ -31,7 +31,7 @@ import {
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import Image from "next/image";
-import { signOut } from "@/lib/actions/user.actions";
+import { deleteAllHistory, signOut } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/ThemeContext";
 
@@ -53,6 +53,12 @@ const SettingContent = () => {
 
     toast("Successfully sign out");
   };
+
+  const deleteHistory = async () => {
+    await deleteAllHistory();
+
+    toast("Successfully deleted history");
+  }
 
   const handleThemeChange = (value: "light" | "dark" | "system") => {
     setTheme(value);
@@ -281,7 +287,7 @@ const SettingContent = () => {
                   <AlertDialogCancel className="shadow-none dark:bg-transparent border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:text-white bg-[#E53051] hover:[#E53051]/70 cursor-pointer">
+                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:text-white bg-[#E53051] hover:bg-[#E53051]/70 cursor-pointer" onClick={deleteHistory}>
                     Confirm Delete <Trash />
                   </AlertDialogAction>
                 </AlertDialogFooter>

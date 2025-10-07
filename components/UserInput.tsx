@@ -10,7 +10,7 @@ const UserInput = ({ text }: { text: string }) => {
       exit={{ y: -100, opacity: 0 }}
       className="inline-flex justify-end w-full"
     >
-      <p className=" text-[17px] text-black1 font-semibold leading-[26px] tracking-[0.36%] px-4.5 py-2 bg-[#FAFAFA] rounded-[40px]">
+      <p className=" text-[17px] text-black1 dark:text-white font-semibold leading-[26px] tracking-[0.36%] px-4.5 py-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-[40px]">
         {text}
       </p>
     </motion.div>
