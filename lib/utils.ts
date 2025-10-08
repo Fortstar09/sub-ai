@@ -12,3 +12,5 @@ export const parseStringify = (value: unknown) =>
 export const removeSpecialCharacters = (value: string) => {
   return value.replace(/[^\w\s]/gi, "");
 };
+
+

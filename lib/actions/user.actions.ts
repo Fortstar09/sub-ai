@@ -249,6 +249,32 @@ export const getStarred = async () => {
   }
 };
 
+export const deleteStarredItem = async (responseId: string) => {
+  const { databases } = await createAdminClient();
+
+  console.log("Deleting starred item with responseId:", responseId);
+
+  try {
+    const documents = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.starredCollectionId,
+      [Query.equal("responseId", responseId)]
+    );
+
+    for (const doc of documents.documents) {
+      await databases.deleteDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.starredCollectionId,
+        doc.$id
+      );
+    }
+    return { deleted: 1 };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const storeHistory = async ({
   ingredient,
   response,
@@ -263,10 +289,14 @@ export const storeHistory = async ({
     const found = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.historyCollectionId,
-      [Query.equal("ingredient", ingredient) && Query.equal("userId", userId)]
+      [
+      Query.equal("ingredient", ingredient),
+      Query.equal("userId", userId)
+      ]
     );
 
     if (found.total === 0) {
+      console.log("Storing new history message");
       await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.historyCollectionId,
@@ -332,7 +362,30 @@ export const deleteAllHistory = async () => {
     }
     console.log("Deleted all history");
     return { deleted: documents.documents.length };
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
+export const deleteEachHistory = async (responseId: string) => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const documents = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.historyCollectionId,
+      [Query.equal("responseId", responseId)]
+    );
+
+    for (const doc of documents.documents) {
+      await databases.deleteDocument(
+        appwriteConfig.databaseId,
+        appwriteConfig.historyCollectionId,
+        doc.$id
+      );
+    }
+    return { deleted: 1 };
   } catch (error) {
     console.log(error);
     throw error;

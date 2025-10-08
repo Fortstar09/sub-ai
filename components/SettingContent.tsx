@@ -34,6 +34,7 @@ import Image from "next/image";
 import { deleteAllHistory, signOut } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/ThemeContext";
+// import ExampleComponent from "./ExampleComponent";
 
 interface User {
   email: string;
@@ -58,7 +59,7 @@ const SettingContent = () => {
     await deleteAllHistory();
 
     toast("Successfully deleted history");
-  }
+  };
 
   const handleThemeChange = (value: "light" | "dark" | "system") => {
     setTheme(value);
@@ -66,7 +67,7 @@ const SettingContent = () => {
   return (
     <div className="flex flex-col gap-9">
       {/* PROFILE SETTING CONTENT */}
-
+      {/* <ExampleComponent textToCopy='Hello Fortunate' /> */}
       <div className="flex flex-col gap-7">
         <h3 className="uppercase text-[#98A2B3] text-sm font-normal">
           Profile
@@ -229,7 +230,9 @@ const SettingContent = () => {
               <DropdownMenuContent>
                 <DropdownMenuRadioGroup
                   value={theme}
-                  onValueChange={(value) => handleThemeChange(value as "light" | "dark" | "system")}
+                  onValueChange={(value) =>
+                    handleThemeChange(value as "light" | "dark" | "system")
+                  }
                 >
                   <DropdownMenuRadioItem value="system">
                     System
@@ -287,7 +290,10 @@ const SettingContent = () => {
                   <AlertDialogCancel className="shadow-none dark:bg-transparent border-[#EEEEEE] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:text-white bg-[#E53051] hover:bg-[#E53051]/70 cursor-pointer" onClick={deleteHistory}>
+                  <AlertDialogAction
+                    className="shadow-none border-[#EEEEEE] dark:text-white bg-[#E53051] hover:bg-[#E53051]/70 cursor-pointer"
+                    onClick={deleteHistory}
+                  >
                     Confirm Delete <Trash />
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -348,7 +354,9 @@ const EachSettingList = ({
   return (
     <div className="flex justify-between items-center">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-black1 dark:text-white font-normal text-[17px]">{heading}</h2>
+        <h2 className="text-black1 dark:text-white font-normal text-[17px]">
+          {heading}
+        </h2>
         <p className="text-[#475367] font-normal text-base">{subheading}</p>
       </div>
       {actionComponent}

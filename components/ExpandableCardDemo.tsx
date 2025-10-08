@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { cn } from "@/lib/utils";
 import { Check, EllipsisVertical } from "lucide-react";
-import { getStarred } from "@/lib/actions/user.actions";
+import { deleteStarredItem, getStarred } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { toast } from "sonner";
 
 export function ExpandableCardDemo() {
   interface StarredType {
@@ -50,6 +51,24 @@ export function ExpandableCardDemo() {
     }
     fetchStarred();
   }, []);
+
+  const unStarredItem = async (id: string) => {
+    console.log("Unstarring item with id:", active);
+    try {
+      await deleteStarredItem(id);
+      toast("Un-starred");
+      //fiter out the unstarred item from the state
+      if (Starred) {
+        const updatedStarred = {
+          documents: Starred.documents.filter((item) => item.responseId !== id),
+        };
+        setStarred(updatedStarred);
+      }
+    } catch (error) {
+      console.error("Error deleting starred item:", error);
+      toast("Failed to unstar ingredient");
+    }
+  };
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -221,7 +240,10 @@ export function ExpandableCardDemo() {
                             <AlertDialogCancel className="cursor-pointer">
                               Cancel
                             </AlertDialogCancel>
-                            <AlertDialogAction className="bg-green-600 hover:bg-green-600/70 cursor-pointer">
+                            <AlertDialogAction
+                              className="bg-green-600 hover:bg-green-600/70 cursor-pointer"
+                              onClick={() => unStarredItem(card.responseId)}
+                            >
                               Confirm
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -232,7 +254,9 @@ export function ExpandableCardDemo() {
                 </Popover>
               </div>
               <div onClick={() => setActive(card)}>
-                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">Yesterday</p>
+                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">
+                  Yesterday
+                </p>
                 <ol className="mt-1 list-decimal text-[#98A2B3] font-normal text-sm pl-4 space-y-1">
                   {JSON.parse(card.response).map(
                     (item: { name: string }, index: number) => (

@@ -15,8 +15,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Load theme from localStorage or default to system
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    if (savedTheme) {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "system") {
       setTheme(savedTheme);
     }
   }, []);
@@ -27,23 +27,26 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       if (theme === "system") {
         const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         root.classList.toggle("dark", prefersDark);
+        localStorage.removeItem("theme");
       } else {
         root.classList.toggle("dark", theme === "dark");
+        localStorage.setItem("theme", theme);
       }
-      localStorage.setItem("theme", theme);
     };
 
     applyTheme(theme);
 
-    // Listen for system theme changes if theme is "system"
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = (e: MediaQueryListEvent) => {
+    // Always listen for system theme changes, but only apply if theme is "system"
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (theme === "system") {
         root.classList.toggle("dark", e.matches);
-      };
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    }
+      }
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
   }, [theme]);
 
   return (
@@ -56,7 +59,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error(
+      "useTheme must be used within a ThemeProvider. Did you forget to wrap your component tree with <ThemeProvider>?"
+    );
   }
   return context;
 };

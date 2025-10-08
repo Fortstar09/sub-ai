@@ -1,13 +1,25 @@
 "use client";
-import { getHistory } from "@/lib/actions/user.actions";
+import { deleteEachHistory, getHistory } from "@/lib/actions/user.actions";
 import { Check, EllipsisVertical, Star, Trash } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useOutsideClick } from "@/hooks/use-outside-click";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Separator } from "./ui/separator";
 import { AnimatePresence, motion } from "motion/react";
 import { CloseIcon } from "./ExpandableCardDemo";
 import Image from "next/image";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import { toast } from "sonner";
 
 interface HistoryType {
   documents: {
@@ -46,6 +58,44 @@ const HistoryTab = () => {
     }
     fetchHistory();
   }, []);
+
+
+  const delectHistoryItem = async (id: string) => {
+    console.log("Unstarring item with id:", active);
+    try {
+      await deleteEachHistory(id);
+      toast("History deleted");
+      //fiter out the unstarred item from the state
+      if (history) {
+        const updatedStarred = {
+          documents: history.documents.filter((item) => item.responseId !== id),
+        };
+        setHistory(updatedStarred);
+      }
+    } catch (error) {
+      console.error("Error deleting starred item:", error);
+      toast("Failed to unstar ingredient");
+    }
+  };
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setActive(false);
+      }
+    }
+
+    if (active && typeof active === "object") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active]);
+
+  useOutsideClick(ref, () => setActive(null));
 
   let historyCards: {
     ingredient: string;
@@ -198,10 +248,10 @@ const HistoryTab = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter className="flex sm:justify-between w-full">
-                            <AlertDialogCancel className="cursor-pointer">
+                            <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-sm font-semibold text-black1 dark:text-white">
                               Cancel
                             </AlertDialogCancel>
-                            <AlertDialogAction className="bg-red-600 hover:bg-red-600/70 cursor-pointer">
+                            <AlertDialogAction className="bg-red-600 hover:bg-red-600/70 text-white cursor-pointer" onClick={() => delectHistoryItem(card.responseId)}>
                               Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -212,7 +262,9 @@ const HistoryTab = () => {
                 </Popover>
               </div>
               <div onClick={() => setActive(card)}>
-                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">Yesterday</p>
+                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">
+                  Yesterday
+                </p>
                 <ol className="mt-1 list-decimal text-[#98A2B3] font-normal text-sm pl-4 space-y-1">
                   {JSON.parse(card.response).map(
                     (item: { name: string }, index: number) => (
