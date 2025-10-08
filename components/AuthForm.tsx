@@ -104,7 +104,7 @@ const AuthForm = ({ type }: { type: string }) => {
                     <FormControl>
                       <Input
                         className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
-    text-[#475367]"
+    text-[#475367] dark:text-white"
                         placeholder="Enter your full name"
                         {...field}
                       />
@@ -126,7 +126,7 @@ const AuthForm = ({ type }: { type: string }) => {
                   <Input
                     type="email"
                     className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
-            text-[#475367]"
+            text-[#475367] dark:text-white"
                     placeholder="Enter your email"
                     {...field}
                   />
@@ -145,7 +145,7 @@ const AuthForm = ({ type }: { type: string }) => {
                   <Input
                     type="password"
                     className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
-            text-[#475367]"
+            text-[#475367] dark:text-white"
                     placeholder="Enter your password"
                     {...field}
                   />
@@ -156,7 +156,7 @@ const AuthForm = ({ type }: { type: string }) => {
           />
           <Button
             type="submit"
-            className="h-13 w-full flex justify-center items-center bg-emerald-600 cursor-pointer hover:bg-emerald-500"
+            className="h-13 w-full flex text-white justify-center items-center bg-emerald-600 cursor-pointer hover:bg-emerald-500"
           >
             {type === "sign-in" ? "Sign In" : "Create Account"}
             {isLoading && (

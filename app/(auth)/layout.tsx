@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <section className=" flex flex-col items-center justify-center gap-2 md:gap-4 min-h-screen px-4 py-10 bg-white">
+    <section className=" flex flex-col items-center justify-center gap-2 md:gap-4 min-h-screen px-4 py-10 bg-white dark:bg-[#171717]">
       <Link href='/'>
       <Image src='/logo/logo-full.svg' alt="logo" height={10} width={100} />
       </Link>
