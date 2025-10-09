@@ -23,6 +23,19 @@ const AIresponse = ({
 
   const jsonObject = JSON.parse(cleanedText);
 
+  const copyText =
+    "Here are some substitutes for " +
+    jsonObject.ingredient +
+    "\n" +
+    (jsonObject.substitutes
+      ? jsonObject.substitutes
+          .map(
+            (item: { name: string; notes: string }, index: number) =>
+              index + 1 + ". " + item.name + "\n" + item.notes
+          )
+          .join("\n")
+      : "No substitutes available");
+
   // Function to store history
   const addToHistory = async () => {
     try {
@@ -103,7 +116,7 @@ const AIresponse = ({
               text="Regenerate"
             />
             <TooltipDemo
-              trigger={<CopyButton setCopy={setCopy} copy={copy} />}
+              trigger={<CopyButton copyText={copyText} setCopy={setCopy} copy={copy} />}
               text="Copy to clipboard"
             />
             <TooltipDemo

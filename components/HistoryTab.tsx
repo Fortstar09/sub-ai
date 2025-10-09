@@ -1,6 +1,10 @@
 "use client";
-import { deleteEachHistory, getHistory } from "@/lib/actions/user.actions";
-import { Check, EllipsisVertical, Star, Trash } from "lucide-react";
+import {
+  deleteEachHistory,
+  getHistory,
+  storeStarred,
+} from "@/lib/actions/user.actions";
+import { Check, EllipsisVertical, Trash } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -20,6 +24,7 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { toast } from "sonner";
+import StarButton from "./StarButton";
 
 interface HistoryType {
   documents: {
@@ -37,6 +42,8 @@ interface HistoryDocument {
 
 const HistoryTab = () => {
   const [history, setHistory] = useState<HistoryType | null>(null);
+  const [star, setStar] = useState(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(true); // New loading state
   const [active, setActive] = useState<
     (typeof historyCards)[number] | boolean | null
@@ -59,7 +66,6 @@ const HistoryTab = () => {
     fetchHistory();
   }, []);
 
-
   const delectHistoryItem = async (id: string) => {
     console.log("Unstarring item with id:", active);
     try {
@@ -75,6 +81,42 @@ const HistoryTab = () => {
     } catch (error) {
       console.error("Error deleting starred item:", error);
       toast("Failed to unstar ingredient");
+    }
+  };
+
+  const addToStar = async (card: HistoryDocument) => {
+
+    if (!star) {
+      setStar(true);
+
+      const starResponse = await storeStarred({
+        ingredient: card.ingredient,
+        //@ts-expect-error response type may not match expected format
+        response: card.response,
+        shouldDelete: true,
+      });
+
+      if (starResponse) {
+        toast(starResponse);
+      } else {
+        toast("Error");
+      }
+    } else {
+      setStar(false);
+
+      
+      const starResponse = await storeStarred({
+        ingredient: card.ingredient,
+        //@ts-expect-error response type may not match expected format
+        response: card.response,
+        shouldDelete: true,
+      });
+
+      if (starResponse) {
+        toast(starResponse);
+      } else {
+        toast("Error");
+      }
     }
   };
 
@@ -211,17 +253,16 @@ const HistoryTab = () => {
                   </PopoverTrigger>
                   <PopoverContent className="max-w-[122px] px-2 py-1 m-0">
                     <div className="flex flex-col gap-1">
-                      <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 hover:bg-gray-100 cursor-pointer rounded-sm">
+                      <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 text-[#98A2B3] dark:hover:text-[#171717] hover:bg-gray-100 cursor-pointer rounded-sm">
                         <Check size={16} color="#98A2B3" strokeWidth={2.5} />
-                        <p className="text-sm text-[#98A2B3] font-normal">
-                          Select
-                        </p>
+                        <p className="text-sm   font-normal">Select</p>
                       </div>
-                      <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 hover:bg-gray-100 cursor-pointer rounded-sm">
-                        <Star size={16} color="#98A2B3" strokeWidth={1.5} />
-                        <p className="text-sm text-[#98A2B3] font-normal">
-                          Star
-                        </p>
+                      <div
+                        className="max-w-[112px] px-1 flex items-center gap-2 py-1 text-[#98A2B3] dark:hover:text-[#171717] hover:bg-gray-100 cursor-pointer rounded-sm"
+                        onClick={() => addToStar(card)}
+                      >
+                        <StarButton star={star} />
+                        <p className="text-sm  font-normal ">Star</p>
                       </div>
                       <Separator />
                       <AlertDialog>
@@ -251,7 +292,10 @@ const HistoryTab = () => {
                             <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-sm font-semibold text-black1 dark:text-white">
                               Cancel
                             </AlertDialogCancel>
-                            <AlertDialogAction className="bg-red-600 hover:bg-red-600/70 text-white cursor-pointer" onClick={() => delectHistoryItem(card.responseId)}>
+                            <AlertDialogAction
+                              className="bg-red-600 hover:bg-red-600/70 text-white cursor-pointer"
+                              onClick={() => delectHistoryItem(card.responseId)}
+                            >
                               Delete
                             </AlertDialogAction>
                           </AlertDialogFooter>

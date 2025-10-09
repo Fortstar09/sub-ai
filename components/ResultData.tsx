@@ -10,7 +10,7 @@ interface ResultDataProps {
     substitutes: Array<{
       name: string;
       ratio: string;
-      note: string;
+      notes: string;
     }>;
   };
 }

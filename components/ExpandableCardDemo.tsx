@@ -241,7 +241,7 @@ export function ExpandableCardDemo() {
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
-                              className="bg-green-600 hover:bg-green-600/70 cursor-pointer"
+                              className="bg-green-600 hover:bg-green-600/70 text-white cursor-pointer"
                               onClick={() => unStarredItem(card.responseId)}
                             >
                               Confirm

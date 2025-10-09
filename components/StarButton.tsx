@@ -5,7 +5,7 @@ const StarButton = ({
   handleStar,
 }: {
   star: boolean;
-  handleStar: React.MouseEventHandler<HTMLDivElement>;
+  handleStar?: React.MouseEventHandler<HTMLDivElement>;
 }) => {
   return (
     <div className="cursor-pointer" onClick={handleStar}>
