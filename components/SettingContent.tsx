@@ -34,7 +34,7 @@ import Image from "next/image";
 import { deleteAllHistory, signOut } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/ThemeContext";
-// import ExampleComponent from "./ExampleComponent";
+
 
 interface User {
   email: string;
@@ -67,7 +67,6 @@ const SettingContent = () => {
   return (
     <div className="flex flex-col gap-9">
       {/* PROFILE SETTING CONTENT */}
-      {/* <ExampleComponent textToCopy='Hello Fortunate' /> */}
       <div className="flex flex-col gap-7">
         <h3 className="uppercase text-[#98A2B3] text-sm font-normal">
           Profile

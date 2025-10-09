@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "./context/ThemeContext";
-import { AlertCircle, CircleCheck } from "lucide-react";
+import { AlertCircle} from "lucide-react";
+import Image from "next/image";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,25 +33,39 @@ export default function RootLayout({
       >
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster
+          style={{ zIndex: 9999, transform: "translateX(0%)" }}
           position="top-center"
           closeButton={false}
+          gap={1}
           icons={{
-            success: <CircleCheck strokeWidth={1.5} className="h-5 w-5 text-[#0F973D] ml-2" />, // Custom success icon
+            success: (
+              <Image
+                src="/icon/check-circle.svg"
+                alt="Success"
+                width={24}
+                height={24}
+                className="h-6 w-6"
+              />
+            ), // Custom success icon
             error: <AlertCircle className="h-4 w-4 text-red-500" />, // Custom error icon
             // default: <Info className="h-4 w-4 text-blue-500" />, // Fallback
           }}
+          visibleToasts={1}
           toastOptions={{
+            duration: 3000,
             style: {
               width: "fit-content",
-              padding: "12px 16px",
+              height: "fit-content",
+              padding: "12px 20px",
               border: "1px solid #B0DCBF",
               backgroundColor: "#D8EDDF",
               borderRadius: "100px",
               color: "#0F973D",
               fontWeight: "500",
               fontSize: "16px",
+              lineHeight: "24px",
+              boxShadow: "none",
             },
-            className: "custom-toast",
           }}
         />
       </body>

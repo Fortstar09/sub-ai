@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -27,8 +27,8 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
-  --color-brand: #1BB425;
-  --color-brandLight: rgb(89, 255, 100)5;
+  --color-brand: #1bb425;
+  --color-brandLight: rgb(89, 255, 100) 5;
   --color-black1: #072206;
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
@@ -49,15 +49,13 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-
-
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
-  --brand: #1BB425;
-  --brandLight:rgb(89, 255, 100)5;
+  --brand: #1bb425;
+  --brandLight: rgb(89, 255, 100) 5;
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
@@ -125,44 +123,57 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-  
   }
   body {
     @apply bg-background text-foreground font-sans transition-all;
-    
   }
 
   .blink {
-    caret-color: #1BB425;
+    caret-color: #1bb425;
     caret-shape: bar;
   }
 
-  .circle{
-    background-color: #EEEEEE;
+  .custom-toast{
+    background-color: #0F973D;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 16px 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: none;
+  }
+
+  .circle {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    animation: Bounce .8s ease-in infinite;
+    animation: Bounce 0.8s ease-in infinite;
+    @apply bg-[#eeeeee] dark:bg-[#333333];
   }
 
-      .circle:nth-child(2){
-        animation-delay: .15s;
-    }
-    .circle:nth-child(3){
-        animation-delay: .25s;
-    }
 
-@keyframes Bounce{
-    0%{
-        transform: translateY(0px);
+  .circle:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .circle:nth-child(3) {
+    animation-delay: 0.25s;
+  }
+
+  @keyframes Bounce {
+    0% {
+      transform: translateY(0px);
     }
-    50%{
-        transform: translateY(-5px);
+    50% {
+      transform: translateY(-5px);
     }
-    100%{
-        transform: translateY(0px);
+    100% {
+      transform: translateY(0px);
     }
-}
+  }
 
   :root {
     --sidebar-background: 0 0% 98%;
@@ -174,7 +185,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
- 
+
   .dark {
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -187,8 +198,7 @@
   }
 }
 
-@layer utilities{
-
+@layer utilities {
   /* ===== TYPOGRAPHY */
   .h1 {
     @apply text-[64px] leading-[42px] font-bold;
@@ -237,7 +247,6 @@
   .overline {
     @apply text-[10px] leading-[14px] font-normal;
   }
-
 }
 
 @font-face {

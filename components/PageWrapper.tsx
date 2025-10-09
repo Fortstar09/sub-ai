@@ -1,5 +1,4 @@
 "use client";
-import Logout from "./Logout";
 import { SidebarInset, SidebarTrigger } from "./ui/sidebar";
 import { useUser } from "@/app/context/UserContext";
 
@@ -25,7 +24,6 @@ const PageWrapper = ({
             <span className="text-sm font-semibold text-white bg-brand rounded-full flex items-center justify-center w-7 h-7 mr-6">
               {user.name[0].toUpperCase()}
             </span>
-            <Logout />
           </div>
         </div>
       </header>

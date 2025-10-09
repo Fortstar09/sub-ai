@@ -10,7 +10,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useTheme } from "@/app/context/ThemeContext";
 
 export function NavMain({
   items,
@@ -27,8 +26,6 @@ export function NavMain({
   }[];
 }) {
   const pathname = usePathname();
-  const {theme} = useTheme();
-
 
   return (
     <SidebarGroup className="px-[14px] py-5 group-data-[collapsible=icon]:p-2">
@@ -45,10 +42,26 @@ export function NavMain({
             >
               <a
                 href={item.url}
-                className={` gap-2 rounded-md ${item.url === pathname ? "bg-[#EDEEF0] dark:bg-[#1B1C20]" : "hover:bg-[#EDEEF0] dark:hover:bg-[#1B1C20]"} flex items-center px-3 py-2 transition-colors`}
+                className={` gap-2 rounded-md ${
+                  item.url === pathname
+                    ? "bg-[#EDEEF0] dark:bg-[#1B1C20]"
+                    : "hover:bg-[#EDEEF0] dark:hover:bg-[#1B1C20]"
+                } flex items-center px-3 py-2 transition-colors`}
               >
-                <item.icon color={`${item.url === pathname ? theme === 'dark' ? '#FFFFFF' : '#072206' : "#667185"}`} strokeWidth={2} size={16}/>
-                <span className={`text-sm text-black1 dark:text-white  ${item.url === pathname ? "font-semibold" : "font-medium"}`}>{item.title}</span>
+                <item.icon
+                  className={`${
+                    item.url === pathname ? "text-black1 dark:text-white" : "text-[#667185]"
+                  }`}
+                  strokeWidth={2}
+                  size={16}
+                />
+                <span
+                  className={`text-sm text-black1 dark:text-white  ${
+                    item.url === pathname ? "font-semibold" : "font-medium"
+                  }`}
+                >
+                  {item.title}
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
