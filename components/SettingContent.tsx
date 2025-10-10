@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import {
   ArrowRightFromLine,
@@ -23,47 +23,64 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  // DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import Image from "next/image";
-import { deleteAllHistory, signOut } from "@/lib/actions/user.actions";
+// import Image from "next/image";
+import { deleteAllHistory, signOut, updateUserName } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/ThemeContext";
-
 
 interface User {
   email: string;
   name: string;
+  username: string;
 }
 
 const SettingContent = () => {
-  const userContext = useUser();
+  const {user, setUser} = useUser();
   const { theme, setTheme } = useTheme();
-  if (!userContext || !userContext.user) {
-    return null;
-  }
-  const { user } = userContext as { user: User };
+  const [name, setName] = useState("");
 
   const handleLogout = async () => {
     await signOut();
 
-    toast("Successfully sign out");
+    toast("Successfully Sign Out");
   };
 
   const deleteHistory = async () => {
     await deleteAllHistory();
 
-    toast("Successfully deleted history");
+    toast("Delete all history");
+  };
+
+  const updateName = async (name: string) => {
+    console.log("Updating username to:", name);
+    try {
+      const result = await updateUserName(name);
+      if (result) {
+        toast.success("Username updated");
+        setUser({...user, username: name} as User);
+      }
+      
+    } catch (error) {
+      console.error("Failed to update username:", error);
+      toast.error("Failed to update username. Please try again.");
+    }
+    finally {
+      setName("");
+    }
   };
 
   const handleThemeChange = (value: "light" | "dark" | "system") => {
     setTheme(value);
   };
+
+  console.log("Current theme:", user);
   return (
     <div className="flex flex-col gap-9">
       {/* PROFILE SETTING CONTENT */}
@@ -72,10 +89,11 @@ const SettingContent = () => {
           Profile
         </h3>
 
-        <EachSettingList heading=" E-Mail Address" subheading={user.email} />
+        <EachSettingList heading=" E-Mail Address" subheading={user?.email} />
+        <EachSettingList heading=" Full Name" subheading={user?.name} />
         <EachSettingList
           heading="Username"
-          subheading={user.name}
+          subheading={user?.username ? user.username : user?.name.split(' ')[0]}
           actionComponent={
             <AlertDialog>
               <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
@@ -99,6 +117,8 @@ const SettingContent = () => {
                     <Input
                       type="username"
                       id="username"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       placeholder="e.g John"
                       className="p-4.5 min-h-14 text-[#475367] w-full text-sm placeholder:text-[#98A2B3]"
                     />
@@ -108,7 +128,12 @@ const SettingContent = () => {
                   <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] bg-green-600 hover:bg-green-600/70 cursor-pointer">
+                  <AlertDialogAction
+                    className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] bg-green-600 hover:bg-green-600/70 cursor-pointer"
+                    onClick={() => {
+                      updateName(name);
+                    }}
+                  >
                     Update <Plus />
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -118,7 +143,7 @@ const SettingContent = () => {
         />
         <EachSettingList
           heading="Log Out"
-          subheading={`You are signed in as ${user.email}`}
+          subheading={`You are signed in as ${user?.email}`}
           actionComponent={
             <AlertDialog>
               <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
@@ -156,24 +181,12 @@ const SettingContent = () => {
         <h3 className="uppercase text-[#98A2B3]  text-sm font-normal">
           GENERAL
         </h3>
-        <EachSettingList
-          heading="Application Language"
-          subheading="English"
-          actionComponent={
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
-                <Image
-                  src="/flag/en.svg"
-                  alt="eng"
-                  width={20}
-                  height={20}
-                  className="rounded-full"
-                />
-                English
-                <ChevronDown size={16} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="min-w-[144px]">
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
+        {/* <EachSettingList
+            heading="Application Language"
+            subheading="English"
+            actionComponent={
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex gap-2 items-center h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
                   <Image
                     src="/flag/en.svg"
                     alt="eng"
@@ -182,41 +195,53 @@ const SettingContent = () => {
                     className="rounded-full"
                   />
                   English
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
-                  <Image
-                    src="/flag/es.svg"
-                    alt="es"
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                  Español
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
-                  <Image
-                    src="/flag/de.svg"
-                    alt="de"
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                  Deutsch
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
-                  <Image
-                    src="/flag/fr.svg"
-                    alt="fr"
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                  Francais
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          }
-        />
+                  <ChevronDown size={16} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="min-w-[144px]">
+                  <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
+                    <Image
+                      src="/flag/en.svg"
+                      alt="eng"
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                    English
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
+                    <Image
+                      src="/flag/es.svg"
+                      alt="es"
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                    Español
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
+                    <Image
+                      src="/flag/de.svg"
+                      alt="de"
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                    Deutsch
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex gap-2 items-center text-sm font-medium text-black1 dark:text-white p-2 cursor-pointer">
+                    <Image
+                      src="/flag/fr.svg"
+                      alt="fr"
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                    Francais
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            }
+          /> */}
         <EachSettingList
           heading="Theme Mode"
           subheading="System (match device theme)"

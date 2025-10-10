@@ -66,7 +66,7 @@ export function ExpandableCardDemo() {
       }
     } catch (error) {
       console.error("Error deleting starred item:", error);
-      toast("Failed to unstar ingredient");
+      toast.error("Failed to unstar ingredient");
     }
   };
 
@@ -152,7 +152,7 @@ export function ExpandableCardDemo() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-neutral-600 text-xs md:text-sm lg:text-base md:h-fit flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400  [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                  className="text-neutral-600 text-sm lg:text-base md:h-fit flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400  [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
                 >
                   {active && active.response
                     ? JSON.parse(active.response).map(
@@ -160,7 +160,7 @@ export function ExpandableCardDemo() {
                           res: { name: string; ratio: string; notes: string },
                           index: number
                         ) => (
-                          <div key={res.name}>
+                          <div key={res.name} className="text-sm md:text-base">
                             <p className="text-[#475367] font-semibold">
                               <span className="pr-2">{index + 1}.</span>
                               {res.name}
@@ -185,7 +185,7 @@ export function ExpandableCardDemo() {
             alt="Loading"
             width={60}
             height={60}
-            className="animate-spin" // Optional: Add spin animation
+            className="animate-spin size-6 md:size-14" // Optional: Add spin animation
           />
           <p className="text-[#475367] font-semibold text-base text-center mt-10">
             Loading starred items...

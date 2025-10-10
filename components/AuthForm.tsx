@@ -56,7 +56,7 @@ const AuthForm = ({ type }: { type: string }) => {
         });
         setIsLoading(false);
 
-        toast(`${response.status}: ${response.message}`);
+        toast(`${response.message}`);
 
         if (response.status === "success") {
           router.push("/dashboard");
@@ -71,7 +71,7 @@ const AuthForm = ({ type }: { type: string }) => {
 
         setIsLoading(false);
 
-        toast(`${response.status}: ${response.message}`);
+        toast(`${response.message}`);
 
         if (response.status === "success") {
           router.push("/dashboard");
@@ -100,12 +100,12 @@ const AuthForm = ({ type }: { type: string }) => {
                 name="fullname"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fullname</FormLabel>
+                    <FormLabel>Full Name</FormLabel>
                     <FormControl>
                       <Input
                         className="h-13 placeholder:text-[#98a2b3cc] blink text-base font-normal
     text-[#475367] dark:text-white"
-                        placeholder="Enter your full name"
+                        placeholder="Enter your fullname"
                         {...field}
                       />
                     </FormControl>

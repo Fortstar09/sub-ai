@@ -208,7 +208,7 @@ const MainContent = () => {
   return (
     <section className="main flex justify-center items-start max-h-dvh rounded-xl md:min-h-min">
       {!messages.length ? (
-        <div className="flex flex-col gap-5 md:gap-[40px] pt-5 md:pt-16 items-center justify-center">
+        <div className="flex flex-col gap-10 pt-5 md:pt-16 items-center justify-center">
           <Intro />
           <PastPrompts pastData={pastData} handlePrompt={handlePrompt} />
         </div>

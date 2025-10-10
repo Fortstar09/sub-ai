@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react'
 
 type User = {
   name: string
+  username?: string
   email: string
 }
 

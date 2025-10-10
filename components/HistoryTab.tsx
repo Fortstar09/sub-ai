@@ -80,7 +80,7 @@ const HistoryTab = () => {
       }
     } catch (error) {
       console.error("Error deleting starred item:", error);
-      toast("Failed to unstar ingredient");
+      toast.error("Failed to unstar ingredient");
     }
   };
 
@@ -99,7 +99,7 @@ const HistoryTab = () => {
       if (starResponse) {
         toast(starResponse);
       } else {
-        toast("Error");
+        toast.error("Error");
       }
     } else {
       setStar(false);
@@ -197,7 +197,7 @@ const HistoryTab = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-neutral-600 text-xs md:text-sm lg:text-base md:h-fit flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
+                  className="text-neutral-600 text-sm lg:text-base md:h-fit flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400 [scrollbar-width:none] [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch]"
                 >
                   {active && active.response
                     ? JSON.parse(active.response).map(

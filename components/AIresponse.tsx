@@ -103,7 +103,7 @@ const AIresponse = ({
           <ResultData jsonObject={jsonObject} />
 
           <div className="flex justify-end items-center gap-5">
-            <TooltipDemo
+            {/* <TooltipDemo
               trigger={
                 <Image
                   src="/icon/regenerate.svg"
@@ -114,12 +114,12 @@ const AIresponse = ({
                 />
               }
               text="Regenerate"
-            />
+            /> */}
             <TooltipDemo
               trigger={<CopyButton copyText={copyText} setCopy={setCopy} copy={copy} />}
               text="Copy to clipboard"
             />
-            <TooltipDemo
+            {/* <TooltipDemo
               trigger={
                 <Image
                   src="/icon/share.svg"
@@ -130,7 +130,7 @@ const AIresponse = ({
                 />
               }
               text="Share"
-            />
+            /> */}
             <TooltipDemo
               trigger={<StarButton handleStar={addToStar} star={star} />}
               text="Star"

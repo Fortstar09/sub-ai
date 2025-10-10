@@ -142,15 +142,70 @@ export const signUp = async ({ email, password, fullname }: SignUpParams) => {
 export async function getLoggedInUser() {
   try {
     const { account } = await createSessionClient();
+    const { databases } = await createAdminClient();
     const result = await account.get();
     const userInfo = parseStringify(result);
 
-    return userInfo;
+    const userId = userInfo.$id; // Your Appwrite user ID
+    const userDocs = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("userId", userId)] // Assumes 'userId' is a field in your documents
+    );
+
+    if (userDocs.documents.length > 0) {
+      const updatedUserInfo = {
+        ...userInfo,
+        username: userDocs.documents[0].username,
+      };
+      return parseStringify(updatedUserInfo);
+    }
   } catch (error) {
     console.log(error);
     return null;
   }
 }
+
+export const updateUserName = async (username: string) => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const user = await getLoggedInUser();
+    if (!user) throw new Error("User not logged in");
+
+    const userId = user.$id; // Your Appwrite user ID
+
+    // Step 1: Query to find the document where field 'userId' matches
+    const userDocs = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("userId", userId)] // Assumes 'userId' is a field in your documents
+    );
+
+    if (userDocs.documents.length === 0) {
+      throw new Error("User document not found");
+    }
+
+    // Assume one document per user; take the first
+    const docId = userDocs.documents[0].$id;
+
+    console.log("Found document ID:", docId, "for userId:", userId);
+
+    // Step 2: Update the found document
+    const updatedUser = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      docId, // Use the queried $id, not userId
+      { username }
+    );
+
+    console.log("Updated user:", updatedUser);
+    return parseStringify(updatedUser);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
 export const signOut = async () => {
   try {
@@ -289,10 +344,7 @@ export const storeHistory = async ({
     const found = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.historyCollectionId,
-      [
-      Query.equal("ingredient", ingredient),
-      Query.equal("userId", userId)
-      ]
+      [Query.equal("ingredient", ingredient), Query.equal("userId", userId)]
     );
 
     if (found.total === 0) {

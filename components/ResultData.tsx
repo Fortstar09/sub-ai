@@ -84,7 +84,7 @@ const EachResult = ({ id, name, notes }: EachResultProps) => {
         transition={{ duration: 1 }}
         className="py-3 px-4 flex flex-col gap-2 border-b border-[#F4F6F5] dark:border-[#171717] last:border-none last:mb-2"
       >
-        <p className="text-base font-semibold text-[#475367]">
+        <p className="text-base font-semibold text-[#475367] dark:text-[#7E8BA0]">
           {id}. {name}{" "}
         </p>
         <p className="text-[14px] max-w-[320px] font-normal text-[#98A2B3] leading-[20px]">

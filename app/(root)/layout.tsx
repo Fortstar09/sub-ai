@@ -9,8 +9,10 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
 
 const user = {
     name: loggedIn?.name || '',
-    email: loggedIn?.email || ''
+    email: loggedIn?.email || '',
+    username: loggedIn?.username || '',
   };
+
 
   if (!loggedIn) redirect("/sign-in");
 
