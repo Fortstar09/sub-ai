@@ -5,7 +5,7 @@ import StarButton from "./StarButton";
 import AiLogoText from "./AiLogoText";
 import { storeHistory, storeStarred } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
-import Image from "next/image";
+// import Image from "next/image";
 import CopyButton from "./CopyButton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
