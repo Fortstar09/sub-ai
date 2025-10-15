@@ -43,6 +43,7 @@ const AIresponse = ({
         await storeHistory({
           ingredient: jsonObject.ingredient,
           response: [JSON.stringify(jsonObject.substitutes)],
+          shouldDelete: false,
         });
       }
     } catch (error) {

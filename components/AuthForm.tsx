@@ -156,7 +156,7 @@ const AuthForm = ({ type }: { type: string }) => {
           />
           <Button
             type="submit"
-            className="h-13 w-full flex text-white justify-center items-center bg-emerald-600 cursor-pointer hover:bg-emerald-500"
+            className="h-13 w-full flex text-white justify-center items-center bg-brand cursor-pointer hover:bg-brand/90"
           >
             {type === "sign-in" ? "Sign In" : "Create Account"}
             {isLoading && (
@@ -170,7 +170,7 @@ const AuthForm = ({ type }: { type: string }) => {
           ? "Don't have an account? "
           : "Already have an account"}{" "}
         <Link
-          className="text-emerald-600 hover:underline"
+          className="text-brand hover:underline"
           href={type === "sign-in" ? "/sign-up" : "/sign-in"}
         >
           {type === "sign-in" ? "Sign Up" : "Sign In"}

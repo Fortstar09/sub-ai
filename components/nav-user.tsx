@@ -20,7 +20,7 @@ export function NavUser() {
             className="flex gap-3 items-center w-full"
           >
             <span className="text-base font-semibold text-white bg-green-600 rounded-full flex items-center justify-center w-8 h-8">
-              {user?.name ? user.name[0].toUpperCase() : "S"}
+              {user?.username ? user.username[0].toUpperCase() : user?.name[0].toUpperCase()}
             </span>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{user?.name ?? ""}</span>

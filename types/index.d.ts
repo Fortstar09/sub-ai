@@ -31,3 +31,14 @@ declare interface getUserInfoProps {
       response: string[];
       shouldDelete?: boolean
   };
+
+
+  interface HistoryDocument {
+    $id?: string;
+    ingredient: string;
+    response: string;
+    responseId: string;
+    star?:boolean;
+    $createdAt?: string;
+  }
+  

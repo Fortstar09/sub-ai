@@ -3,8 +3,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import { cn } from "@/lib/utils";
-import { Check, EllipsisVertical } from "lucide-react";
+import { cn, formatRelativeDate } from "@/lib/utils";
+import {
+  Check,
+  EllipsisVertical,
+  Square,
+  SquareCheck,
+  Star,
+} from "lucide-react";
 import { deleteStarredItem, getStarred } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -27,10 +33,14 @@ export function ExpandableCardDemo() {
       ingredient: string;
       response: string;
       responseId: string;
+      $createdAt?: string;
     }[];
   }
 
   const [Starred, setStarred] = useState<StarredType | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isUnstarring, setIsUnstarring] = useState(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(true); // New loading state
   const [active, setActive] = useState<
     (typeof starredCards)[number] | boolean | null
@@ -52,21 +62,90 @@ export function ExpandableCardDemo() {
     fetchStarred();
   }, []);
 
+  const toggleSelect = (id: string) => {
+    if (isUnstarring) return;
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
   const unStarredItem = async (id: string) => {
-    console.log("Unstarring item with id:", active);
+    console.log("Unstarring item with id:", id);
     try {
       await deleteStarredItem(id);
       toast("Un-starred");
-      //fiter out the unstarred item from the state
+      return true;
+    } catch (error) {
+      console.error("Error deleting starred item:", error);
+      toast.error("Failed to unstar ingredient");
+      throw error;
+    }
+  };
+
+  const handleSingleUnstar = async (id: string) => {
+    if (isUnstarring) return;
+
+    setIsUnstarring(true);
+
+    try {
+      await unStarredItem(id);
+
+      // Filter out the unstarred item from the state
       if (Starred) {
         const updatedStarred = {
           documents: Starred.documents.filter((item) => item.responseId !== id),
         };
         setStarred(updatedStarred);
       }
+
+      // Remove from selected if it was selected
+      const newSet = new Set(selectedIds);
+      newSet.delete(id);
+      setSelectedIds(newSet);
+    } finally {
+      setIsUnstarring(false);
+    }
+  };
+
+  const handleBulkUnstar = async () => {
+    if (selectedIds.size === 0 || isUnstarring) return;
+
+    setIsUnstarring(true);
+
+    try {
+      const results = await Promise.allSettled(
+        Array.from(selectedIds).map((responseId) => unStarredItem(responseId))
+      );
+
+      const successes = results.filter((r) => r.status === "fulfilled").length;
+      const failures = results.filter((r) => r.status === "rejected").length;
+
+      // Filter out all unstarred items from the state
+      if (Starred && Starred.documents.length > 0) {
+        const unstarredIds = Array.from(selectedIds);
+        const updatedDocuments = Starred.documents.filter(
+          (item) => !unstarredIds.includes(item.responseId)
+        );
+        setStarred({ documents: updatedDocuments });
+      }
+
+      setSelectedIds(new Set());
+
+      if (successes > 0) {
+        toast(`${successes} item(s) un-starred successfully`);
+      }
+      if (failures > 0) {
+        toast.error(`${failures} item(s) failed to un-star`);
+      }
     } catch (error) {
-      console.error("Error deleting starred item:", error);
-      toast.error("Failed to unstar ingredient");
+      console.error("Bulk unstar error:", error);
+      toast.error("Failed to un-star items");
+    } finally {
+      setIsUnstarring(false);
     }
   };
 
@@ -93,36 +172,66 @@ export function ExpandableCardDemo() {
     ingredient: string;
     response: string;
     responseId: string;
+    $createdAt?: string;
   }
 
   let starredCards: {
     ingredient: string;
     response: string;
     responseId: string;
+    $createdAt?: string;
   }[] = [];
 
   if (Starred && Array.isArray(Starred.documents)) {
     starredCards = Starred.documents.map((doc: StarredDocument) => ({
+      $createdAt: doc.$createdAt,
       ingredient: doc.ingredient,
       response: doc.response,
       responseId: doc.responseId,
     }));
   }
 
+  const selectionMode = selectedIds.size > 0;
+  const allSelected = selectedIds.size === starredCards.length;
+
+  const handleCardClick = (card: StarredDocument) => {
+    if (isUnstarring) return;
+    setActive(card);
+  };
+
   return (
     <>
+      {/* Unstarring Loading Overlay */}
+      {isUnstarring && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200]">
+          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg flex flex-col items-center gap-4">
+            <Image
+              src="/icon/loader.svg"
+              alt="Unstarring"
+              width={40}
+              height={40}
+              className="animate-spin"
+            />
+            <p className="text-[#475367] font-semibold text-base text-center">
+              Un-starring ingredients...
+            </p>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence>
-        {active && typeof active === "object" && (
+        {active && typeof active === "object" && !isUnstarring && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setActive(null)}
             className="fixed inset-0 bg-black/80 h-full w-full z-10"
           />
         )}
       </AnimatePresence>
       <AnimatePresence>
-        {active && typeof active === "object" ? (
+        {active && typeof active === "object" && !isUnstarring ? (
           <div className="fixed inset-0 grid place-items-center z-[100]">
             <motion.button
               key={active.responseId}
@@ -192,81 +301,142 @@ export function ExpandableCardDemo() {
           </p>
         </div>
       ) : starredCards.length > 0 ? (
-        <div className="mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 items-start gap-6">
-          {starredCards.map((card) => (
-            <div
-              className="p-4 border w-full h-[173px] cursor-pointer overflow-hidden flex-col flex gap-1 border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[20px]"
-              key={card.responseId}
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-[#475367] text-base font-semibold">
-                  Substitutes for{" "}
-                  <span className="capitalize">“{card.ingredient}”</span>
-                </h2>
-                <Popover>
-                  <PopoverTrigger className="cursor-pointer">
-                    <EllipsisVertical size={20} color="#667185" />
-                  </PopoverTrigger>
-                  <PopoverContent className="max-w-[122px] px-2 py-1 m-0">
-                    <div className="flex flex-col gap-1">
-                      <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 hover:bg-gray-100 cursor-pointer rounded-sm">
-                        <Check size={16} color="#98A2B3" strokeWidth={2.5} />
-                        <p className="text-sm text-[#98A2B3] font-normal">
-                          Select
-                        </p>
-                      </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger>
-                          <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 hover:bg-gray-100 cursor-pointer rounded-sm">
-                            <Image
-                              src="/icon/starIcon.svg"
-                              alt="unstar"
-                              width={16}
-                              height={16}
-                            />
-                            <p className="text-sm text-[#98A2B3] font-normal">
-                              Un-star
-                            </p>
-                          </div>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Un-star item?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to unstar this starred item?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex sm:justify-between w-full">
-                            <AlertDialogCancel className="cursor-pointer">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-green-600 hover:bg-green-600/70 text-white cursor-pointer"
-                              onClick={() => unStarredItem(card.responseId)}
-                            >
-                              Confirm
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div onClick={() => setActive(card)}>
-                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">
-                  Yesterday
-                </p>
-                <ol className="mt-1 list-decimal text-[#98A2B3] font-normal text-sm pl-4 space-y-1">
-                  {JSON.parse(card.response).map(
-                    (item: { name: string }, index: number) => (
-                      <li key={index}>{item.name}</li>
+        <div>
+          {selectionMode && (
+            <div className="mb-4 flex items-center gap-2">
+              {allSelected ? (
+                <SquareCheck
+                  size={20}
+                  className="cursor-pointer fill-brand stroke-1.5 stroke-white rounded-xs"
+                  onClick={() => setSelectedIds(new Set())}
+                />
+              ) : (
+                <Square
+                  size={20}
+                  color="#EEEEEE"
+                  strokeWidth={2.5}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    setSelectedIds(
+                      new Set(starredCards.map((c) => c.responseId))
                     )
-                  )}
-                </ol>
-              </div>
+                  }
+                />
+              )}
+              <span className="text-[#475367] text-sm font-normal">Select all ({selectedIds.size} selected)</span>
+              <Star
+                className="cursor-pointer size-4 ml-2 text-[#98A2B3] hover:fill-brand hover:text-brand "
+                onClick={handleBulkUnstar}
+              />
             </div>
-          ))}
+          )}
+          <div className="mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 items-start gap-6">
+            {starredCards.map((card) => {
+              const isSelected = selectedIds.has(card.responseId);
+              return (
+                <div
+                  className={`p-4 border w-full h-[173px] cursor-pointer overflow-hidden flex-col flex gap-1 rounded-[20px] ${
+                    isSelected
+                      ? "border-green-500"
+                      : "border-[#EEEEEE] dark:border-[#1E1E1E]"
+                  }`}
+                  key={card.responseId}
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-[#475367] text-base font-semibold">
+                      Substitutes for{" "}
+                      <span className="capitalize">“{card.ingredient}”</span>
+                    </h2>
+                    {selectionMode ? (
+                      <div
+                        className="cursor-pointer flex items-center justify-center"
+                        onClick={() => toggleSelect(card.responseId)}
+                      >
+                        {isSelected ? (
+                          <SquareCheck
+                            size={20}
+                            className="cursor-pointer fill-brand stroke-1.5 stroke-white rounded-xs"
+                          />
+                        ) : (
+                          <Square size={20} color="#667185" />
+                        )}
+                      </div>
+                    ) : (
+                      <Popover>
+                        <PopoverTrigger className="cursor-pointer">
+                          <EllipsisVertical size={20} color="#667185" />
+                        </PopoverTrigger>
+                        <PopoverContent className="max-w-[122px] p-1 m-0">
+                          <div className="flex flex-col gap-1">
+                            <div
+                              className="max-w-[112px] px-1 flex items-center gap-2 py-1 text-[#98A2B3] dark:hover:text-[#171717] hover:bg-gray-100 cursor-pointer rounded-sm"
+                              onClick={() => toggleSelect(card.responseId)}
+                            >
+                              <Check
+                                size={16}
+                                color="#98A2B3"
+                                strokeWidth={2.5}
+                              />
+                              <p className="text-sm font-normal">Select</p>
+                            </div>
+                            <AlertDialog>
+                              <AlertDialogTrigger>
+                                <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 text-[#98A2B3] dark:hover:text-[#171717] hover:bg-gray-100 cursor-pointer rounded-sm">
+                                  <Image
+                                    src="/icon/starIcon.svg"
+                                    alt="unstar"
+                                    width={16}
+                                    height={16}
+                                  />
+                                  <p className="text-sm font-normal">Un-star</p>
+                                </div>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Un-star item?
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to unstar this starred
+                                    item?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="flex sm:justify-between w-full">
+                                  <AlertDialogCancel className="cursor-pointer">
+                                    Cancel
+                                  </AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-green-600 hover:bg-green-600/70 text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() =>
+                                      handleSingleUnstar(card.responseId)
+                                    }
+                                  >
+                                    Confirm
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </div>
+                  <div onClick={() => handleCardClick(card)}>
+                    <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">
+                      {card.$createdAt ? formatRelativeDate(card.$createdAt): "Unknown date"}
+                    </p>
+                    <ol className="mt-1 list-decimal text-[#98A2B3] font-normal text-sm pl-4 space-y-1">
+                      {JSON.parse(card.response).map(
+                        (item: { name: string }, index: number) => (
+                          <li key={index}>{item.name}</li>
+                        )
+                      )}
+                    </ol>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col justify-center items-center h-full mt-[90px] w-full">

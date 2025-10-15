@@ -31,9 +31,14 @@ import {
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 // import Image from "next/image";
-import { deleteAllHistory, signOut, updateUserName } from "@/lib/actions/user.actions";
+import {
+  deleteAllHistory,
+  signOut,
+  updateUserName,
+} from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { useTheme } from "@/app/context/ThemeContext";
+import Link from "next/link";
 
 interface User {
   email: string;
@@ -42,7 +47,7 @@ interface User {
 }
 
 const SettingContent = () => {
-  const {user, setUser} = useUser();
+  const { user, setUser } = useUser();
   const { theme, setTheme } = useTheme();
   const [name, setName] = useState("");
 
@@ -64,14 +69,12 @@ const SettingContent = () => {
       const result = await updateUserName(name);
       if (result) {
         toast.success("Username updated");
-        setUser({...user, username: name} as User);
+        setUser({ ...user, username: name } as User);
       }
-      
     } catch (error) {
       console.error("Failed to update username:", error);
       toast.error("Failed to update username. Please try again.");
-    }
-    finally {
+    } finally {
       setName("");
     }
   };
@@ -93,7 +96,7 @@ const SettingContent = () => {
         <EachSettingList heading=" Full Name" subheading={user?.name} />
         <EachSettingList
           heading="Username"
-          subheading={user?.username ? user.username : user?.name.split(' ')[0]}
+          subheading={user?.username ? user.username : user?.name.split(" ")[0]}
           actionComponent={
             <AlertDialog>
               <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[8px] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-600 hover:text-white shadow-none">
@@ -124,12 +127,12 @@ const SettingContent = () => {
                     />
                   </div>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="flex sm:justify-between w-full mt-6">
+                <AlertDialogFooter className="flex sm:justify-between gap-3 w-full mt-3 md:mt-6">
                   <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-base font-semibold text-black1 dark:text-white">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] bg-green-600 hover:bg-green-600/70 cursor-pointer"
+                    className="shadow-none border-[#EEEEEE] dark:text-white dark:border-[#1E1E1E] bg-green-600 hover:bg-green-600/70 cursor-pointer"
                     onClick={() => {
                       updateName(name);
                     }}
@@ -163,7 +166,7 @@ const SettingContent = () => {
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] bg-red-600 hover:bg-red-600/70 cursor-pointer"
+                    className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] dark:text-white bg-red-600 hover:bg-red-600/70 cursor-pointer"
                     onClick={handleLogout}
                   >
                     Log out <ArrowRightFromLine />
@@ -279,7 +282,12 @@ const SettingContent = () => {
               variant="outline"
               className="h-9 border-[#EEEEEE] dark:border-[#1E1E1E] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-700 hover:text-white shadow-none"
             >
-              Check About us
+              <Link
+                href="https://empathetic-communication-530229.framer.app/"
+                target="_blank"
+              >
+                Check About us
+              </Link>
               <CornerDownLeft size={16} />
             </Button>
           }
@@ -326,8 +334,9 @@ const SettingContent = () => {
           }
         />
         <EachSettingList
-          heading="Delete History"
-          subheading="Deleting your ingredient history is permanent and irreversible"
+          heading="Delete Account"
+          subheading="Deleting your account is permanent and irreversible"
+          isDanger
           actionComponent={
             <AlertDialog>
               <AlertDialogTrigger className="h-9 border border-[#EEEEEE] dark:border-[#1E1E1E]  rounded-[8px] text-[#E53051] font-medium text-sm p-2 cursor-pointer hover:bg-[#DF1C41] hover:text-white shadow-none">
@@ -368,20 +377,28 @@ interface EachSettingListProps {
   heading: string;
   subheading?: string;
   actionComponent?: React.ReactNode;
+  isDanger?: boolean;
 }
 
 const EachSettingList = ({
   heading,
   subheading,
   actionComponent,
+  isDanger,
 }: EachSettingListProps) => {
   return (
     <div className="flex justify-between items-center">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-black1 dark:text-white font-normal text-[17px]">
+        <h2
+          className={`${
+            isDanger ? "text-[#DF1C41]" : "text-black1 dark:text-white"
+          } font-normal text-base md:text-[17px]`}
+        >
           {heading}
         </h2>
-        <p className="text-[#475367] font-normal text-base">{subheading}</p>
+        <p className="text-[#475367] font-normal text-sm md:text-base max-w-[200px] md:max-w-full">
+          {subheading}
+        </p>
       </div>
       {actionComponent}
     </div>

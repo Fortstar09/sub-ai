@@ -225,10 +225,18 @@ export const signOut = async () => {
   }
 };
 
+export interface StoreDataProps {
+  ingredient: string;
+  response: string | string[];
+  shouldDelete: boolean;
+  historyId?: string; // Optional history document ID for updating star field
+}
+
 export const storeStarred = async ({
   ingredient,
   response,
   shouldDelete,
+  historyId,
 }: StoreDataProps) => {
   const { databases } = await createAdminClient();
   try {
@@ -238,7 +246,6 @@ export const storeStarred = async ({
     const userId = user.$id;
 
     if (shouldDelete) {
-      // ✅ Delete logic
       const found = await databases.listDocuments(
         appwriteConfig.databaseId,
         appwriteConfig.starredCollectionId,
@@ -250,6 +257,7 @@ export const storeStarred = async ({
       );
 
       if (found.total === 0) {
+        // Star: Create new starred document
         await databases.createDocument(
           appwriteConfig.databaseId,
           appwriteConfig.starredCollectionId,
@@ -262,15 +270,36 @@ export const storeStarred = async ({
           }
         );
 
+        // Update history document star field to true if historyId provided
+        if (historyId) {
+          await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.historyCollectionId, // Assuming this is your history collection ID
+            historyId,
+            { star: true }
+          );
+        }
+
         console.log("starred message");
         return "Starred";
       }
 
+      // Unstar: Delete existing starred documents
       for (const doc of found.documents) {
         await databases.deleteDocument(
           appwriteConfig.databaseId,
           appwriteConfig.starredCollectionId,
           doc.$id
+        );
+      }
+
+      // Update history document star field to false if historyId provided
+      if (historyId) {
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.historyCollectionId, // Assuming this is your history collection ID
+          historyId,
+          { star: false }
         );
       }
 
@@ -294,7 +323,7 @@ export const getStarred = async () => {
     const starred = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.starredCollectionId,
-      [Query.equal("userId", userId)]
+      [Query.equal("userId", userId), Query.orderDesc('$createdAt')]
     );
 
     return parseStringify(starred);
@@ -380,7 +409,7 @@ export const getHistory = async () => {
     const history = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.historyCollectionId,
-      [Query.equal("userId", userId)]
+      [Query.equal("userId", userId), Query.orderDesc('$createdAt')],
     );
 
     return parseStringify(history);

@@ -4,14 +4,14 @@ import {
   getHistory,
   storeStarred,
 } from "@/lib/actions/user.actions";
-import { Check, EllipsisVertical, Trash } from "lucide-react";
+import { Square, SquareCheck, Trash } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Separator } from "./ui/separator";
 import { AnimatePresence, motion } from "motion/react";
 import { CloseIcon } from "./ExpandableCardDemo";
 import Image from "next/image";
+import { toast } from "sonner";
+import HistoryEachTab from "./HistoryEachTab";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,33 +23,30 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
-import { toast } from "sonner";
-import StarButton from "./StarButton";
 
 interface HistoryType {
   documents: {
+    $id?: string;
     ingredient: string;
     response: string;
     responseId: string;
+    $createdAt?: string;
+    star?: boolean;
   }[];
-}
-
-interface HistoryDocument {
-  ingredient: string;
-  response: string;
-  responseId: string;
 }
 
 const HistoryTab = () => {
   const [history, setHistory] = useState<HistoryType | null>(null);
-  const [star, setStar] = useState(false);
-
-  const [isLoading, setIsLoading] = useState<boolean>(true); // New loading state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [active, setActive] = useState<
     (typeof historyCards)[number] | boolean | null
   >(null);
 
   const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
+
+  // Fetch History Data
 
   useEffect(() => {
     async function fetchHistory() {
@@ -66,57 +63,110 @@ const HistoryTab = () => {
     fetchHistory();
   }, []);
 
-  const delectHistoryItem = async (id: string) => {
-    console.log("Unstarring item with id:", active);
+  // Toggle Select each Item
+
+  const toggleSelect = (id: string) => {
+    if (isDeleting) return;
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedIds(newSet);
+  };
+
+  // Delete each Item
+
+  const deleteHistoryIt = async (id: string) => {
     try {
       await deleteEachHistory(id);
       toast("History deleted");
-      //fiter out the unstarred item from the state
+      // Filter out the deleted item from the state
       if (history) {
-        const updatedStarred = {
+        const updatedHistory = {
           documents: history.documents.filter((item) => item.responseId !== id),
         };
-        setHistory(updatedStarred);
+        setHistory(updatedHistory);
       }
+      // Also remove from selected if it was selected
+      const newSet = new Set(selectedIds);
+      newSet.delete(id);
+      setSelectedIds(newSet);
     } catch (error) {
-      console.error("Error deleting starred item:", error);
-      toast.error("Failed to unstar ingredient");
+      console.error("Error deleting history item:", error);
+      toast.error("Failed to delete history item");
     }
   };
 
-  const addToStar = async (card: HistoryDocument) => {
+  // Bulk Delete Items
 
-    if (!star) {
-      setStar(true);
+  const handleDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setIsDeleting(true);
+    try {
+      const results = await Promise.allSettled(
+        Array.from(selectedIds).map((responseId) => deleteHistoryIt(responseId))
+      );
 
+      const successes = results.filter((r) => r.status === "fulfilled").length;
+      const failures = results.filter((r) => r.status === "rejected").length;
+
+      if (history && history.documents.length > 0) {
+        const deletedIds = Array.from(selectedIds);
+        const updatedDocuments = history.documents.filter(
+          (item) => !deletedIds.includes(item.responseId)
+        );
+        setHistory({ documents: updatedDocuments });
+      }
+
+      setSelectedIds(new Set());
+
+      if (successes > 0) {
+        toast(`${successes} item(s) deleted successfully`);
+      }
+      if (failures > 0) {
+        toast.error(`${failures} item(s) failed to delete`);
+      }
+    } catch (error) {
+      console.error("Bulk delete error:", error);
+      toast.error("Failed to delete items");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Star each Item
+  const starItem = async (card: HistoryDocument) => {
+    try {
       const starResponse = await storeStarred({
         ingredient: card.ingredient,
-        //@ts-expect-error response type may not match expected format
         response: card.response,
         shouldDelete: true,
+        historyId: card.$id, // Pass the history document ID to update the star field
       });
 
       if (starResponse) {
         toast(starResponse);
-      } else {
-        toast.error("Error");
+        console.log(card.$id);
+        console.log(card);
+        // Immediately update local history state for instant UI feedback
+        setHistory((prev) => {
+          if (!prev || !prev.documents) return prev;
+          const newStarValue = starResponse === "Starred" ? true : false;
+          return {
+            ...prev,
+            documents: prev.documents.map((doc) =>
+              doc.responseId === card.responseId
+                ? { ...doc, star: newStarValue }
+                : doc
+            ),
+          };
+        });
       }
-    } else {
-      setStar(false);
-
-      
-      const starResponse = await storeStarred({
-        ingredient: card.ingredient,
-        //@ts-expect-error response type may not match expected format
-        response: card.response,
-        shouldDelete: true,
-      });
-
-      if (starResponse) {
-        toast(starResponse);
-      } else {
-        toast("Error");
-      }
+    } catch (error) {
+      console.error("Error starring item:", error);
+      toast.error("Failed to star item");
     }
   };
 
@@ -140,18 +190,27 @@ const HistoryTab = () => {
   useOutsideClick(ref, () => setActive(null));
 
   let historyCards: {
+    $id?: string;
+    $createdAt?: string;
     ingredient: string;
     response: string;
     responseId: string;
+    star?: boolean;
   }[] = [];
 
   if (history && Array.isArray(history.documents)) {
     historyCards = history.documents.map((doc: HistoryDocument) => ({
+      $id: doc.$id,
+      star: doc.star,
+      $createdAt: doc.$createdAt,
       ingredient: doc.ingredient,
       response: doc.response,
       responseId: doc.responseId,
     }));
   }
+
+  const selectionMode = selectedIds.size > 0;
+  const allSelected = selectedIds.size === historyCards.length;
 
   return (
     <>
@@ -166,6 +225,22 @@ const HistoryTab = () => {
           />
         )}
       </AnimatePresence>
+      {isDeleting && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200]">
+          <div className="bg-white dark:bg-neutral-900 p-6 rounded-lg flex flex-col items-center gap-4">
+            <Image
+              src="/icon/loader.svg"
+              alt="Unstarring"
+              width={40}
+              height={40}
+              className="animate-spin"
+            />
+            <p className="text-[#475367] font-semibold text-base text-center">
+              Deleting history...
+            </p>
+          </div>
+        </div>
+      )}
       <AnimatePresence>
         {active && typeof active === "object" ? (
           <div className="fixed inset-0 grid place-items-center z-[100]">
@@ -185,12 +260,22 @@ const HistoryTab = () => {
               ref={ref}
               className="w-full lg:w-[600px] h-fit md:h-fit flex flex-col gap-8 bg-white dark:bg-neutral-900 sm:rounded-3xl p-8"
             >
-              <motion.h3
-                layoutId={`title-${active.ingredient}`}
-                className="font-medium text-black1 leading-normal capitalize dark:text-neutral-200 text-2xl md:text-[34px]"
-              >
-                {active.ingredient}
-              </motion.h3>
+              <div className="w-full flex items-center justify-between">
+                <motion.h3
+                  layoutId={`title-${active.ingredient}`}
+                  className="font-medium text-black1 leading-normal capitalize dark:text-neutral-200 text-2xl md:text-[34px]"
+                >
+                  {active.ingredient}
+                </motion.h3>
+                {active.star && (
+                  <Image
+                    src="/icon/starred-fill.svg"
+                    width={32}
+                    height={32}
+                    alt="starred"
+                  />
+                )}
+              </div>
               <div className="relative">
                 <motion.div
                   layoutId={`card-${active.ingredient}`}
@@ -237,88 +322,79 @@ const HistoryTab = () => {
           </p>
         </div>
       ) : historyCards.length > 0 ? (
-        <div className="mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 items-start gap-4">
-          {historyCards.map((card) => (
-            <div
-              className="p-4 border w-full h-[173px] cursor-pointer overflow-hidden flex-col flex gap-1 border-[#EEEEEE] dark:border-[#1E1E1E] rounded-[20px]"
-              key={card.responseId}
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-[#475367] text-base font-semibold">
-                  Substitutes for “{card.ingredient}”
-                </h2>
-                <Popover>
-                  <PopoverTrigger className="cursor-pointer">
-                    <EllipsisVertical size={20} color="#667185" />
-                  </PopoverTrigger>
-                  <PopoverContent className="max-w-[122px] px-2 py-1 m-0">
-                    <div className="flex flex-col gap-1">
-                      <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 text-[#98A2B3] dark:hover:text-[#171717] hover:bg-gray-100 cursor-pointer rounded-sm">
-                        <Check size={16} color="#98A2B3" strokeWidth={2.5} />
-                        <p className="text-sm   font-normal">Select</p>
-                      </div>
-                      <div
-                        className="max-w-[112px] px-1 flex items-center gap-2 py-1 text-[#98A2B3] dark:hover:text-[#171717] hover:bg-gray-100 cursor-pointer rounded-sm"
-                        onClick={() => addToStar(card)}
-                      >
-                        <StarButton star={star} />
-                        <p className="text-sm  font-normal ">Star</p>
-                      </div>
-                      <Separator />
-                      <AlertDialog>
-                        <AlertDialogTrigger>
-                          <div className="max-w-[112px] px-1 flex items-center gap-2 py-1 hover:bg-gray-100 cursor-pointer rounded-sm">
-                            <Trash
-                              size={16}
-                              color="#D42620"
-                              strokeWidth={2.5}
-                            />
-                            <p className="text-sm text-[#D42620] font-normal">
-                              Delete
-                            </p>
-                          </div>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Delete starred item?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete this starred item?
-                              This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex sm:justify-between w-full">
-                            <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-sm font-semibold text-black1 dark:text-white">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-red-600 hover:bg-red-600/70 text-white cursor-pointer"
-                              onClick={() => delectHistoryItem(card.responseId)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div onClick={() => setActive(card)}>
-                <p className="text-xs text-[#D0D5DD] dark:text-[#2D333E] font-normal">
-                  Yesterday
-                </p>
-                <ol className="mt-1 list-decimal text-[#98A2B3] font-normal text-sm pl-4 space-y-1">
-                  {JSON.parse(card.response).map(
-                    (item: { name: string }, index: number) => (
-                      <li key={index}>{item.name}</li>
+        <div>
+          {selectedIds.size > 0 && (
+            <div className="mb-4 flex items-center gap-1">
+              {allSelected ? (
+                <SquareCheck
+                  size={20}
+                  className="cursor-pointer fill-brand stroke-1.5 stroke-white rounded-xs"
+                  onClick={() => setSelectedIds(new Set())}
+                />
+              ) : (
+                <Square
+                  size={20}
+                  color="#EEEEEE"
+                  strokeWidth={2.5}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    setSelectedIds(
+                      new Set(historyCards.map((c) => c.responseId))
                     )
-                  )}
-                </ol>
-              </div>
+                  }
+                />
+              )}
+              <span className="text-[#475367] text-sm font-normal">
+                Select all ({selectedIds.size} selected)
+              </span>
+              <span className="flex justify-center items-center gap-4 ml-8">
+                {/* <Star className="cursor-pointer size-4 text-[#98A2B3] " /> */}
+
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <Trash className="cursor-pointer size-4 text-[#98A2B3] " />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete history item?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete selected histories? This
+                        action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex sm:justify-between w-full">
+                      <AlertDialogCancel className="shadow-none border-[#EEEEEE] dark:border-[#1E1E1E] cursor-pointer text-sm font-semibold text-black1 dark:text-white">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-red-600 hover:bg-red-600/70 text-white cursor-pointer"
+                        onClick={handleDelete}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </span>
             </div>
-          ))}
+          )}
+          <div className="mx-auto w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 items-start gap-4">
+            {historyCards.map((card) => {
+              const isSelected = selectedIds.has(card.responseId);
+              return (
+                <HistoryEachTab
+                  deleteHistoryIt={deleteHistoryIt}
+                  selectionMode={selectionMode}
+                  setActive={setActive}
+                  toggleSelect={toggleSelect}
+                  card={card}
+                  isSelected={isSelected}
+                  starItem={starItem}
+                  key={card.responseId}
+                />
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col justify-center items-center h-full mt-[90px] w-full">

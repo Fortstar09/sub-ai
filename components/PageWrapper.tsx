@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { SidebarInset, SidebarTrigger } from "./ui/sidebar";
 import { useUser } from "@/app/context/UserContext";
 
@@ -21,9 +22,14 @@ const PageWrapper = ({
         <div className="flex items-center justify-between px-4 w-full">
           <SidebarTrigger className="-ml-1" />
           <div className="flex justify-center gap-3 md:gap-0 items-center">
-            <span className="text-sm font-semibold text-white bg-brand rounded-full flex items-center justify-center w-7 h-7 mr-6">
-              {user.name[0].toUpperCase()}
-            </span>
+            <Link
+              href="/setting"
+              className="text-sm font-semibold text-white bg-brand rounded-full flex items-center justify-center w-7 h-7 cursor-pointer"
+            >
+              {user.username
+                ? user.username[0].toUpperCase()
+                : user.name[0].toUpperCase()}
+            </Link>
           </div>
         </div>
       </header>
