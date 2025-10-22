@@ -283,7 +283,7 @@ const SettingContent = () => {
               className="h-9 border-[#EEEEEE] dark:border-[#1E1E1E] text-black1 dark:text-white font-medium text-sm p-2 cursor-pointer hover:bg-green-700 hover:text-white shadow-none"
             >
               <Link
-                href="https://empathetic-communication-530229.framer.app/"
+                href="https://sub-ai.framer.website"
                 target="_blank"
               >
                 Check About us
